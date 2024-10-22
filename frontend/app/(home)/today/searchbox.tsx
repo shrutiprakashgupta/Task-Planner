@@ -23,19 +23,18 @@ import {
 } from "@/components/ui/popover"
 
 export function SearchBox({
-    all_tasks,
-    set_all_tasks,
-    set_tasks
+    suggestions,
+    value,
+    set_value
 }: {
-    all_tasks: any;
-    set_all_tasks: any;
-    set_tasks: any;
+    suggestions: any;
+    value: any;
+    set_value: any;
 }) {
-  const [open, setOpen] = React.useState(false)
-  const [value, setValue] = React.useState("")
+  const [open, set_open] = React.useState(false)
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={open} onOpenChange={set_open}>
       <PopoverTrigger asChild>
         <Button
           variant="outline"
@@ -44,7 +43,7 @@ export function SearchBox({
           className="w-full justify-between"
         >
           {value
-            ? all_tasks.find((task: any) => task.name === value).name
+            ? suggestions.find((task: any) => task.name === value).name
             : "Add Task"}
           <ListPlus className="ml-2 h-5 w-5 shrink-0 opacity-100" />
         </Button>
@@ -55,15 +54,14 @@ export function SearchBox({
           <CommandList>
             <CommandEmpty>No tasks found.</CommandEmpty>
             <CommandGroup>
-              {all_tasks && all_tasks.map((task: any, index: number) => (
+              {suggestions && suggestions.map((task: any, index: number) => (
                 <CommandItem
                   key={index}
                   value={task.name}
                   onSelect={(currentValue) => {
-                    setValue(currentValue === value ? "" : currentValue)
-                    setOpen(false)
-                    set_tasks((task: any) => [...task, all_tasks.filter((task: any) => task.name === currentValue)[0]]);
-                    // set_all_tasks(all_tasks.filter((task: any) => task.name !== currentValue));
+                    // set_value(currentValue === value ? "" : currentValue)
+                    set_value(currentValue)
+                    set_open(false)
                   }}
                 >
                   {task.name}

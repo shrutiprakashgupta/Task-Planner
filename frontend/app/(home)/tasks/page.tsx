@@ -26,10 +26,10 @@ function filter_tasks(pattern: string, all_tasks: [], set_tasks: any) {
         set_tasks(filtered_tasks)
 }
 
-function get_task_card_view(status: string, task: any, index: number) {
+function get_task_card_view(status: string, task: any, index: number, all_tasks: any, set_all_tasks: any) {
     if (task.status == status) {
         return (
-            <TaskCardView task={task.name} key={index} tag={task.tag} planned_days={task.planned_days} done_days={task.done_days} planned_date={task.planned_date} start_date={task.start_date} end_date={task.end_date} status={task.status}></TaskCardView>
+            <TaskCardView task={task} key={index} all_tasks={all_tasks} set_all_tasks={set_all_tasks}></TaskCardView>
         )
     } else {
         return (
@@ -66,7 +66,7 @@ export default function Tasks() {
                         <h2 className="text-xl font-medium tracking-wide text-center align-middle align-text-bottom text-white">Planned Tasks</h2>
                     </div>
                     {tasks.map((task: any, index: number) => {
-                        return get_task_card_view("Planned", task, index)
+                        return get_task_card_view("Planned", task, index, all_tasks, set_all_tasks)
                     })}
                 </ScrollArea>
             </div>
@@ -76,7 +76,7 @@ export default function Tasks() {
                         <h2 className="text-xl font-medium tracking-wide text-center align-middle align-text-bottom text-white">Ongoing Tasks</h2>
                     </div>
                     {tasks.map((task: any, index: number) => {
-                        return get_task_card_view("Ongoing", task, index)
+                        return get_task_card_view("Ongoing", task, index, all_tasks, set_all_tasks)
                     })}
                 </ScrollArea>
             </div>
@@ -86,7 +86,7 @@ export default function Tasks() {
                         <h2 className="text-xl font-medium tracking-wide text-center align-middle align-text-bottom text-white">Completed Tasks</h2>
                     </div>
                     {tasks.map((task: any, index: number) => {
-                        return get_task_card_view("Completed", task, index)
+                        return get_task_card_view("Completed", task, index, all_tasks, set_all_tasks)
                     })}
                 </ScrollArea>
             </div>
