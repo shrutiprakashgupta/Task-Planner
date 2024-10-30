@@ -17,6 +17,19 @@ async function get_tasks(set_tasks: any) {
     }
 }
 
+export async function update_tasks(updated_tasks: any, set_all_tasks: any) {
+    set_all_tasks(updated_tasks)
+    try {
+        let response = await fetch('http://127.0.0.1:5000/home', 
+                    {method: "POST", 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify(updated_tasks)});
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+
 function filter_tasks(pattern: string, all_tasks: [], set_tasks: any) {
         var re = new RegExp(pattern, "i");
         let filtered_tasks = all_tasks.filter(function (task: any) {
@@ -26,10 +39,10 @@ function filter_tasks(pattern: string, all_tasks: [], set_tasks: any) {
         set_tasks(filtered_tasks)
 }
 
-function get_task_card_view(status: string, task: any, index: number, all_tasks: any, set_all_tasks: any) {
+function get_task_card_view(status: string, task: any, index: number, set_tag: any, set_planned_days: any, set_planned_date: any, set_start_date: any, set_end_date: any, set_task_update: any, set_task_delete: any) {
     if (task.status == status) {
         return (
-            <TaskCardView task={task} key={index} all_tasks={all_tasks} set_all_tasks={set_all_tasks}></TaskCardView>
+            <TaskCardView task={task} key={index} set_tag={set_tag} set_planned_days={set_planned_days} set_planned_date={set_planned_date} set_start_date={set_start_date} set_end_date={set_end_date} set_task_update={set_task_update} set_task_delete={set_task_delete}></TaskCardView>
         )
     } else {
         return (
@@ -41,11 +54,71 @@ function get_task_card_view(status: string, task: any, index: number, all_tasks:
 export default function Tasks() {
     const [all_tasks, set_all_tasks] = useState<any>([]);
     const [tasks, set_tasks] = useState<any>([]);
+    const [tag, set_tag] = useState<any>("")
+    const [planned_days, set_planned_days] = useState<any>(0)
+    const [planned_date, set_planned_date] = useState<any>("")
+    const [start_date, set_start_date] = useState<any>("")
+    const [end_date, set_end_date] = useState<any>("")
+    const [task_update, set_task_update] = useState<any>(0)
+    const [task_delete, set_task_delete] = useState<any>(0)
 
     useEffect(() => {
         get_tasks(set_all_tasks)
         get_tasks(set_tasks)
     }, []);
+
+    useEffect (() => {
+      if (task_update != "") {
+        let t_updated
+        for (let t of all_tasks) {
+            if (t.index === task_update) {
+                t_updated = t
+            } 
+        }
+        if (tag != "") {
+          t_updated.tag = tag
+        }
+        if (planned_days != "") {
+          t_updated.planned_days = planned_days
+        }
+        if (planned_date != "") {
+          let t_planned_date = new Date(Date.parse(planned_date))
+          t_updated.planned_date = t_planned_date.toLocaleDateString('en-US', {year: '2-digit', month: 'short', day: '2-digit'})
+        }
+        if (start_date != "") {
+          let t_start_date = new Date(Date.parse(start_date))
+          t_updated.start_date = t_start_date.toLocaleDateString('en-US', {year: '2-digit', month: 'short', day: '2-digit'})
+        }
+        if (end_date != "") {
+          let t_end_date = new Date(Date.parse(end_date))
+          t_updated.end_date = t_end_date.toLocaleDateString('en-US', {year: '2-digit', month: 'short', day: '2-digit'})
+        }
+        let updated_tasks = []
+        for (let t of all_tasks) {
+            if (t.index === task_update) {
+                updated_tasks.push(t_updated)
+            } else {
+                updated_tasks.push(t)
+            }
+        }
+        update_tasks(updated_tasks, set_all_tasks);
+        set_task_update("")
+      }
+    }, [task_update])
+
+    useEffect (() => {
+        if (task_delete != "") {
+            let updated_tasks = []
+            for (let t of all_tasks) {
+                if (t.index === task_delete) {
+                } else {
+                    updated_tasks.push(t)
+                }
+            } 
+            update_tasks(updated_tasks, set_all_tasks);
+            set_task_delete("")
+        }
+    }, [task_delete])
 
     return (
     <div>
@@ -66,7 +139,7 @@ export default function Tasks() {
                         <h2 className="text-xl font-medium tracking-wide text-center align-middle align-text-bottom text-white">Planned Tasks</h2>
                     </div>
                     {tasks.map((task: any, index: number) => {
-                        return get_task_card_view("Planned", task, index, all_tasks, set_all_tasks)
+                        return get_task_card_view("Planned", task, index, set_tag, set_planned_days, set_planned_date, set_start_date, set_end_date, set_task_update, set_task_delete)
                     })}
                 </ScrollArea>
             </div>
@@ -76,7 +149,7 @@ export default function Tasks() {
                         <h2 className="text-xl font-medium tracking-wide text-center align-middle align-text-bottom text-white">Ongoing Tasks</h2>
                     </div>
                     {tasks.map((task: any, index: number) => {
-                        return get_task_card_view("Ongoing", task, index, all_tasks, set_all_tasks)
+                        return get_task_card_view("Ongoing", task, index, set_tag, set_planned_days, set_planned_date, set_start_date, set_end_date, set_task_update, set_task_delete)
                     })}
                 </ScrollArea>
             </div>
@@ -86,7 +159,7 @@ export default function Tasks() {
                         <h2 className="text-xl font-medium tracking-wide text-center align-middle align-text-bottom text-white">Completed Tasks</h2>
                     </div>
                     {tasks.map((task: any, index: number) => {
-                        return get_task_card_view("Completed", task, index, all_tasks, set_all_tasks)
+                        return get_task_card_view("Completed", task, index, set_tag, set_planned_days, set_planned_date, set_start_date, set_end_date, set_task_update, set_task_delete)
                     })}
                 </ScrollArea>
             </div>

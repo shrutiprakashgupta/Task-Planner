@@ -57,7 +57,7 @@ function get_todays_contri (day: any, tasks: any){
     return todays_contri
 }
 
-export async function update_tasks(day: any, updated_tasks: any, set_all_tasks: any) {
+export async function update_tasks(updated_tasks: any, set_all_tasks: any) {
     set_all_tasks(updated_tasks)
     try {
         let response = await fetch('http://127.0.0.1:5000/home', 
@@ -94,6 +94,7 @@ function PopoverRemark({
                 type="text" 
                 onKeyDown ={e => {
                         if (e.key === "Enter") {
+                            now = new Date().toLocaleTimeString()
                             let task_copy = JSON.parse(JSON.stringify(task))
                             if ("remark" in task_copy[weekdates[day]]) {
                                 task_copy[weekdates[day]]["remark"].push([now, (e.target as HTMLInputElement).value])
@@ -108,7 +109,7 @@ function PopoverRemark({
                                     updated_tasks.push(t)
                                 }
                             }
-                            update_tasks(day, updated_tasks, set_all_tasks)
+                            update_tasks(updated_tasks, set_all_tasks)
                         }
                 }}
             />
@@ -154,7 +155,7 @@ function PopoverDone({
                         }
                         let todays_contri = get_todays_contri(day, updated_tasks)
                         if (todays_contri <= 1) {
-                            update_tasks(day, updated_tasks, set_all_tasks)
+                            update_tasks(updated_tasks, set_all_tasks)
                         }
                     }
                 }
@@ -243,7 +244,7 @@ function DayView({
                         updated_tasks.push(t)
                     }
                 }
-                update_tasks(day, updated_tasks, set_all_tasks)
+                update_tasks(updated_tasks, set_all_tasks)
             }
             set_value("")
         }
@@ -305,7 +306,6 @@ function DayView({
 
 export default function Today() {
     const [all_tasks, set_all_tasks] = useState<any>([]);
-    // TODO: fix the weekdays below
     const [week, set_week] = useState([0, 1, 2, 3, 4])
     const [contri, set_contri] = useState<any>(0); 
 

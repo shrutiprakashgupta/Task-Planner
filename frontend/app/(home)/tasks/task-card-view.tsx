@@ -9,47 +9,30 @@ import {
   CalendarCog,
   CalendarCheck2,
   Slash,
-  CircleDot,
-  Trash2,
-  Pencil
+  CircleDot
 } from 'lucide-react'
-import { 
-  Button 
-} from "@/components/ui/button"
 import { TaskEditView } from "./task-edit-view";
-import { useEffect, useState } from "react";
+import { TaskDelete } from "./task-delete";
 
 export default function TaskCardView({
   task,
-  all_tasks,
-  set_all_tasks
+  set_tag,
+  set_planned_days,
+  set_planned_date,
+  set_start_date,
+  set_end_date,
+  set_task_update,
+  set_task_delete
 }: {
   task: any;
-  all_tasks: any;
-  set_all_tasks: any;
+  set_tag: any;
+  set_planned_days: any;
+  set_planned_date: any;
+  set_start_date: any;
+  set_end_date: any;
+  set_task_update: any;
+  set_task_delete: any;
 }) {
-
-  const [tag, set_tag] = useState<any>("")
-  const [planned_days, set_planned_days] = useState<any>(0)
-  const [planned_date, set_planned_date] = useState<any>("")
-  const [start_date, set_start_date] = useState<any>("")
-  const [task_update, set_task_update] = useState<any>(0)
-
-  useEffect (() => {
-    let t_updated = task
-    t_updated.tag = tag
-    t_updated.planned_days = planned_days
-    t_updated.planned_date = planned_date
-    t_updated.start_date = start_date
-    let updated_tasks = []
-    for (let t of all_tasks) {
-        if (((t.name === task.name) && (t.tag === task.tag))) {
-            updated_tasks.push(t_updated)
-        } else {
-            updated_tasks.push(t)
-        }
-    }
-  }, [task_update])
 
     if (task.status == "Planned") {
     return (
@@ -59,10 +42,8 @@ export default function TaskCardView({
               <div className="flex flex-row justify-between">
                 <p>{task.name}</p>
                 <div>
-                  <TaskEditView task={task} set_tag={set_tag} set_planned_date={set_planned_date} set_planned_days={set_planned_days} set_start_date={set_start_date} set_task_update={set_task_update}></TaskEditView>
-                  <Button variant="ghost" size="icon" className="self-center">
-                      <Trash2 className="h-3.5 w-3.5 hover:fill-white hover:border-white" color="#52525b"/>
-                  </Button>
+                  <TaskEditView task={task} status={"Planned"} set_tag={set_tag} set_planned_date={set_planned_date} set_planned_days={set_planned_days} set_start_date={set_start_date} set_end_date={set_end_date} set_task_update={set_task_update}></TaskEditView>
+                  <TaskDelete task={task} set_task_delete={set_task_delete}></TaskDelete>
                 </div>
               </div>
             </CardTitle>
@@ -104,10 +85,8 @@ export default function TaskCardView({
               <div className="flex flex-row justify-between">
                 <p>{task.name}</p>
                 <div>
-                  <TaskEditView task={task} set_tag={set_tag} set_planned_date={set_planned_date} set_planned_days={set_planned_days} set_start_date={set_start_date} set_task_update={set_task_update}></TaskEditView>
-                  <Button variant="ghost" size="icon" className="self-center">
-                      <Trash2 className="h-3.5 w-3.5 hover:fill-white hover:border-white" color="#52525b"/>
-                  </Button>
+                  <TaskEditView task={task} status={"Ongoing"} set_tag={set_tag} set_planned_date={set_planned_date} set_planned_days={set_planned_days} set_start_date={set_start_date} set_end_date={set_end_date} set_task_update={set_task_update}></TaskEditView>
+                  <TaskDelete task={task} set_task_delete={set_task_delete}></TaskDelete>
                 </div>
               </div>
             </CardTitle>
@@ -149,10 +128,8 @@ export default function TaskCardView({
               <div className="flex flex-row justify-between">
                 <p>{task.name}</p>
                 <div>
-                  <TaskEditView task={task} set_tag={set_tag} set_planned_date={set_planned_date} set_planned_days={set_planned_days} set_start_date={set_start_date} set_task_update={set_task_update}></TaskEditView>
-                  <Button variant="ghost" size="icon" className="self-center">
-                      <Trash2 className="h-3.5 w-3.5 hover:fill-white hover:border-white" color="#52525b"/>
-                  </Button>
+                  <TaskEditView task={task} status={"Completed"} set_tag={set_tag} set_planned_date={set_planned_date} set_planned_days={set_planned_days} set_start_date={set_start_date} set_end_date={set_end_date} set_task_update={set_task_update}></TaskEditView>
+                  <TaskDelete task={task} set_task_delete={set_task_delete}></TaskDelete>
                 </div>
               </div>
             </CardTitle>
