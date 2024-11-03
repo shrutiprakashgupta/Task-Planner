@@ -1,54 +1,54 @@
 'use client';
 
-import TaskCardView from "./task-card-view"
-import { ScrollArea } from "@/components/ui/scroll-area"
+import { 
+    ScrollArea 
+} from "@/components/ui/scroll-area"
 import {
   Input
 } from "@/components/ui/input"
-import { useEffect, useState } from "react";
+import { 
+    useEffect, 
+    useState,
+    useRef
+} from "react";
+import { 
+    get_tasks,
+    update_tasks  
+} from "../utils";
+import TaskCardView from "./task-card-view"
 
-async function get_tasks(set_tasks: any) {
-    try {
-        let response = await fetch('http://127.0.0.1:5000/home');
-        let tasks_json = await response.json();
-        set_tasks(tasks_json);
-    } catch (error) {
-        console.log(error)
-    }
-}
+function filter_tasks(
+    pattern: string, 
+    all_tasks: [], 
+    set_tasks: any
+) {
+    let control = pattern[0]
+    let input = pattern.slice(1)
 
-export async function update_tasks(updated_tasks: any, set_all_tasks: any) {
-    set_all_tasks(updated_tasks)
-    try {
-        let response = await fetch('http://127.0.0.1:5000/home', 
-                    {method: "POST", 
-                    headers: { 'Content-Type': 'application/json' }, 
-                    body: JSON.stringify(updated_tasks)});
-    } catch (error) {
-        console.log(error)
-    }
-}
-
-
-function filter_tasks(pattern: string, all_tasks: [], set_tasks: any) {
-        var re = new RegExp(pattern, "i");
+    //Search in existing tasks
+    if (control === '/') {
+        var re = new RegExp(input, "i");
         let filtered_tasks = all_tasks.filter(function (task: any) {
             return (re.test(task.name) || re.test(task.tag));
         }
         );
         set_tasks(filtered_tasks)
+    }
 }
 
-function get_task_card_view(status: string, task: any, index: number, set_tag: any, set_planned_days: any, set_planned_date: any, set_start_date: any, set_end_date: any, set_task_update: any, set_task_delete: any) {
-    if (task.status == status) {
-        return (
-            <TaskCardView task={task} key={index} set_tag={set_tag} set_planned_days={set_planned_days} set_planned_date={set_planned_date} set_start_date={set_start_date} set_end_date={set_end_date} set_task_update={set_task_update} set_task_delete={set_task_delete}></TaskCardView>
-        )
-    } else {
-        return (
-            ""
-        )
-    }
+function CategoryView({
+    status
+}:{
+    status: any;
+}
+) {
+    return (
+        <div className="bg-[#25162c] bg-gradient-to-r from-[#25162c] via-[#41274f] to-[#25162c] rounded-xl border-4 py-2 hover:rounded-none">
+            <h2 className="text-xl font-medium tracking-wide text-center align-middle align-text-bottom text-white">
+                {status} Tasks
+            </h2>
+        </div>
+    )
 }
 
 export default function Tasks() {
@@ -61,38 +61,61 @@ export default function Tasks() {
     const [end_date, set_end_date] = useState<any>("")
     const [task_update, set_task_update] = useState<any>(0)
     const [task_delete, set_task_delete] = useState<any>(0)
+    const [task_add, set_task_add] = useState<any>(0)
+    const searchRef = useRef<HTMLInputElement>(null);
 
+    //Read all data from backend
     useEffect(() => {
         get_tasks(set_all_tasks)
         get_tasks(set_tasks)
     }, []);
 
+    //Setup shortcut key for Search
+    useEffect(() => {
+        const handleKeyPress = (event: KeyboardEvent) => {
+          if (((event.key === '/') || (event.key === ':')) && searchRef.current) {
+            searchRef.current.focus();
+          }
+        };
+
+        // Add event listener when the component mounts
+        document.addEventListener('keydown', handleKeyPress);
+
+        // Clean up the event listener when the component unmounts
+        return () => {
+          document.removeEventListener('keydown', handleKeyPress);
+        };
+    }, []);
+
+    //Update task
     useEffect (() => {
       if (task_update != "") {
+        //Select the task to be updated
         let t_updated
         for (let t of all_tasks) {
             if (t.index === task_update) {
                 t_updated = t
             } 
         }
+
+        //Update the provided fields only
         if (tag != "") {
-          t_updated.tag = tag
+            t_updated.tag = tag
         }
         if (planned_days != "") {
-          t_updated.planned_days = planned_days
+            t_updated.planned_days = planned_days
         }
         if (planned_date != "") {
-          let t_planned_date = new Date(Date.parse(planned_date))
-          t_updated.planned_date = t_planned_date.toLocaleDateString('en-US', {year: '2-digit', month: 'short', day: '2-digit'})
+            t_updated.planned_date = planned_date
         }
         if (start_date != "") {
-          let t_start_date = new Date(Date.parse(start_date))
-          t_updated.start_date = t_start_date.toLocaleDateString('en-US', {year: '2-digit', month: 'short', day: '2-digit'})
+            t_updated.start_date = start_date
         }
         if (end_date != "") {
-          let t_end_date = new Date(Date.parse(end_date))
-          t_updated.end_date = t_end_date.toLocaleDateString('en-US', {year: '2-digit', month: 'short', day: '2-digit'})
+            t_updated.end_date = end_date
         }
+
+        //Update the backend data as well
         let updated_tasks = []
         for (let t of all_tasks) {
             if (t.index === task_update) {
@@ -102,67 +125,115 @@ export default function Tasks() {
             }
         }
         update_tasks(updated_tasks, set_all_tasks);
+        
+        //Update the task view with new info
+        set_tasks(updated_tasks)
         set_task_update("")
       }
     }, [task_update])
 
+    //Delete task
     useEffect (() => {
         if (task_delete != "") {
             let updated_tasks = []
             for (let t of all_tasks) {
                 if (t.index === task_delete) {
+                    //Remove the deleted task info
                 } else {
                     updated_tasks.push(t)
                 }
             } 
+
+            //Update the backend data as well
             update_tasks(updated_tasks, set_all_tasks);
+
+            //Remove the deleted task from current view
+            set_tasks(updated_tasks)
             set_task_delete("")
         }
     }, [task_delete])
 
+    //Add New task
+    useEffect (() => {
+        if (task_add != "") {
+            let name = task_add
+            if (name[0] === ':') {
+                let index = all_tasks.length
+                let today = new Date().toLocaleDateString()
+
+                //Initialize default values for the new task
+                let new_task = {
+                    name: name.slice(1),
+                    index: index, 
+                    tag: "New Task", 
+                    status: "Planned", 
+                    planned_date: today, 
+                    planned_days: 0, 
+                    start_date: today, 
+                    done_days: 0, 
+                    end_date: today}
+
+                //Add the new task into database
+                let updated_tasks = all_tasks
+                updated_tasks.push(new_task)
+                console.log(name)
+                update_tasks(updated_tasks, set_all_tasks);
+
+                //Add the task to current view
+                set_tasks(updated_tasks)
+                set_task_add("")
+            }
+        }
+    }, [task_add])
+
+    //Task View
+    let task_category = ["Planned", "Ongoing", "Completed"]
     return (
     <div>
         <div className="flex px-8 pt-4 justify-center">
             <Input
-                placeholder="Search Tasks"
+                ref={searchRef}
+                placeholder="Search/Add Tasks"
                 autoFocus
                 onChange={(event) => 
                     filter_tasks(event.target.value, all_tasks, set_tasks)
                 }
+                onKeyDown={(event) => {
+                    if (event.key === 'Enter') {
+                        set_task_add(event.currentTarget.value);
+                    }
+                }}
                 className="h-12 w-11/12 border-2 hover:border-[#9b9cb5] hover:border-3"
             />
         </div>
         <div className="flex justify-around grid gap-y-4 pt-2 pb-4 px-12 grid-cols-3">
-            <div>
-                <ScrollArea className="rounded-md border p-4">
-                    <div className="bg-[#25162c] bg-gradient-to-r from-[#25162c] via-[#41274f] to-[#25162c] rounded-xl border-4 py-2 hover:rounded-none">
-                        <h2 className="text-xl font-medium tracking-wide text-center align-middle align-text-bottom text-white">Planned Tasks</h2>
-                    </div>
-                    {tasks.map((task: any, index: number) => {
-                        return get_task_card_view("Planned", task, index, set_tag, set_planned_days, set_planned_date, set_start_date, set_end_date, set_task_update, set_task_delete)
-                    })}
-                </ScrollArea>
-            </div>
-            <div>
-                <ScrollArea className="rounded-md border py-4">
-                    <div className="bg-[#25162c] bg-gradient-to-r from-[#25162c] via-[#41274f] to-[#25162c] rounded-xl border-4 py-2 hover:rounded-none">
-                        <h2 className="text-xl font-medium tracking-wide text-center align-middle align-text-bottom text-white">Ongoing Tasks</h2>
-                    </div>
-                    {tasks.map((task: any, index: number) => {
-                        return get_task_card_view("Ongoing", task, index, set_tag, set_planned_days, set_planned_date, set_start_date, set_end_date, set_task_update, set_task_delete)
-                    })}
-                </ScrollArea>
-            </div>
-            <div>
-                <ScrollArea className="rounded-md border p-4">
-                    <div className="bg-[#25162c] bg-gradient-to-r from-[#25162c] via-[#41274f] to-[#25162c] rounded-xl border-4 py-2 hover:rounded-none">
-                        <h2 className="text-xl font-medium tracking-wide text-center align-middle align-text-bottom text-white">Completed Tasks</h2>
-                    </div>
-                    {tasks.map((task: any, index: number) => {
-                        return get_task_card_view("Completed", task, index, set_tag, set_planned_days, set_planned_date, set_start_date, set_end_date, set_task_update, set_task_delete)
-                    })}
-                </ScrollArea>
-            </div>
+            {task_category.map((category: any, index: number) => {
+                return (
+                <div key={index}>
+                    <ScrollArea className="rounded-md border p-4">
+                        <CategoryView 
+                            status={category}>
+                        </CategoryView>
+                        {tasks.map((task: any, index: number) => {
+                            if (task.status === category) {
+                                return (
+                                    <TaskCardView task={task}
+                                        key={index}
+                                        set_tag={set_tag}
+                                        set_planned_days={set_planned_days}
+                                        set_planned_date={set_planned_date}
+                                        set_start_date={set_start_date}
+                                        set_end_date={set_end_date}
+                                        set_task_update={set_task_update}
+                                        set_task_delete={set_task_delete}>
+                                    </TaskCardView>
+                                )
+                            }
+                        })}
+                    </ScrollArea>
+                </div>
+                )
+            })}
         </div>
     </div>
     )

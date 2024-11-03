@@ -59,7 +59,6 @@ export function SearchBox({
                   key={index}
                   value={task.name}
                   onSelect={(currentValue) => {
-                    // set_value(currentValue === value ? "" : currentValue)
                     set_value(currentValue)
                     set_open(false)
                   }}
