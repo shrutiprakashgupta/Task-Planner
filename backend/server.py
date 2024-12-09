@@ -7,22 +7,46 @@ import json
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}})
 
-@app.route('/home', methods=['GET', 'POST'])
-def home():
+@app.route('/tasks', methods=['GET', 'POST'])
+def tasks():
     if request.method == 'POST':
-        return update_data(request.get_json())
+        return update_tasks(request.get_json())
     else:
-        return send_data()
+        return read_tasks()
 
-def update_data(response):
-    print(response)
+def update_tasks(response):
     with open("data/tasks.json", "w") as tasks:
         json.dump(response, tasks)
         tasks.close()
     return "Tasks Updated"
 
-def send_data():
+def read_tasks():
     with open('data/tasks.json') as tasks:
         tasks_data = json.load(tasks)
         tasks.close()
     return tasks_data
+
+@app.route('/remarks', methods=['GET', 'POST'])
+def remarks():
+    if request.method == 'POST':
+        return update_remarks(request.get_json())
+    else:
+        return read_remarks()
+
+def update_remarks(response):
+    remarks_data = []
+    with open("data/remarks.json", "r") as remarks:
+        remarks_data = json.load(remarks) 
+        print(remarks_data)
+        remarks.close()
+    remarks_data.append(response)
+    with open("data/remarks.json", "w") as remarks:
+        json.dump(remarks_data, remarks)
+        remarks.close()
+    return "Remarks Updated"
+
+def read_remarks():
+    with open('data/remarks.json') as remarks:
+        remarks_data = json.load(remarks)
+        remarks.close()
+    return remarks_data

@@ -21,18 +21,17 @@ import {
 } from "@/components/ui/popover"
 import { 
     get_tasks,
+    update_remarks,
     update_tasks
  } from "../utils";
 
 let today = new Date().toLocaleDateString("en-CA")
 let weekdays = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 
-function get_week_dates(day: any, set_week:any) {
+function get_week_dates(day: number, set_week:any) {
     var week= new Array(); 
     let last_day = new Date()
     last_day.setDate(last_day.getDate() - day)
-    console.log(day)
-    console.log(last_day)
 
     var i = 0;
     while(i < 5) {
@@ -51,11 +50,11 @@ function get_week_dates(day: any, set_week:any) {
     set_week(week)
 }
 
-function get_todays_contri (day: any, tasks: any){
+function get_todays_contri (date: any, tasks: any){
     let todays_contri = 0
     for (let task of tasks) {
-        if ((day in task) && ("done" in task[day])) {
-            todays_contri = todays_contri + parseFloat(task[day]["done"]);
+        if ((date in task) && ("done" in task[date])) {
+            todays_contri = todays_contri + parseFloat(task[date]["done"]);
         }
     }
     return todays_contri
@@ -93,10 +92,10 @@ function PopoverRemark({
 }
 
 function PopoverDone({
-    day,
+    date,
     task, 
     set_done
-}:{  day: any;
+}:{  date: any;
     task: any;
     set_done: any;
 }) {
@@ -113,9 +112,9 @@ function PopoverDone({
                 className="h-6 w-min m-2 align-self-center justify-end border-[#41274f]"
                 type="range"
                 min="0" max="1" step="0.1"
-                value={task[day]["done"]}
+                value={task[date]["done"]}
                 onChange={e => {
-                        set_done([task.index, day, parseFloat(e.target.value).toFixed(1)])
+                        set_done([task.index, date, parseFloat(e.target.value)])
                     }
                 }
             />
@@ -144,17 +143,29 @@ function TaskNameView({
 function DayNameView({
     title,
     index,
+    date,
     set_day
 } : {
     title: string;
     index: number;
+    date: any;
     set_day: any;
 }) {
     const IncreaseValue = () => {
-        set_day((day: number) => day + 1);
+        let weekday = weekdays[new Date(date).getDay()]
+        if (weekday === "Mon") {
+            set_day((day: number) => day + 3)
+        } else {
+            set_day((day: number) => day + 1)
+        }
     }
     const DecreaseValue = () => {
-        set_day((day: number) => day - 1);
+        let weekday = weekdays[new Date(date).getDay()]
+        if (weekday === "Fri") {
+            set_day((day: number) => day - 3)
+        } else {
+            set_day((day: number) => day - 1)
+        }
     }
 
     if (index === 0) 
@@ -187,11 +198,11 @@ function DayNameView({
 }
 
 function ActiveTaskView({
-    day,
+    date,
     task, 
     set_done,
     set_remark,
-}:{ day: any;
+}:{ date: any;
     task: any; 
     set_done: any;
     set_remark: any;
@@ -199,10 +210,10 @@ function ActiveTaskView({
     let task_view_height = window.innerHeight * 10/12;
     return (
         <div className="rounded-md bg-black border-l-4 border-[#41274f] my-1 hover:border-2 hover:border-white" 
-            style={{ height: (task[day]["done"] * task_view_height) }}>
+            style={{ height: (task[date]["done"] * task_view_height) }}>
             <div className="flex flex-row justify-between">
                 <TaskNameView 
-                    task_done={task[day]["done"]} 
+                    task_done={task[date]["done"]} 
                     task_name={task.name}>
                 </TaskNameView>
                 <PopoverRemark 
@@ -219,12 +230,12 @@ function ActiveTaskView({
                 </div>
                 <div className="flex flex-row">
                     <PopoverDone 
-                        day={day} 
+                        date={date} 
                         task={task} 
                         set_done={set_done}>
                     </PopoverDone>
                     <div className="w-1"></div>
-                    <p className="text-xs self-center mr-2" color="#52525b">{task[day]["done"]}</p>
+                    <p className="text-xs self-center mr-2" color="#52525b">{task[date]["done"]}</p>
                 </div>
             </div>
         </div>
@@ -233,6 +244,7 @@ function ActiveTaskView({
 
 function DayView({
     day,
+    date,
     index,
     task,
     set_day,
@@ -240,7 +252,8 @@ function DayView({
     set_done,
     set_remark,
     all_tasks, 
-}:{ day: any; 
+}:{ day: number;
+    date: any; 
     index: number;
     task: any;
     set_day: any;
@@ -250,13 +263,14 @@ function DayView({
     all_tasks: any; 
 }) {
 
-    let weekday = new Date(day).toLocaleDateString('en-US', {day: '2-digit', month: 'short', weekday: 'short'})
-    if (day === today) {
+    let weekday = new Date(date).toLocaleDateString('en-US', {day: '2-digit', month: 'short', weekday: 'short'})
+    if (date === today) {
         return (
             <div className="flex rounded-xl justify-self-center w-11/12 my-2 flex-col grow">
                 <DayNameView
                     title="Today"
                     index={index}
+                    date={date}
                     set_day={set_day}>
                 </DayNameView>
                 <div className="rounded-xl mt-2 bg-[#18181b] grow">
@@ -269,12 +283,12 @@ function DayView({
                     </div>
                     <div className="mx-2">
                         {all_tasks.map((task: any, index: number) => {
-                            if ((day in task) && ("done" in task[day])) {
-                                if (parseFloat(task[day]["done"]) > 0) {
+                            if ((date in task) && ("done" in task[date])) {
+                                if (parseFloat(task[date]["done"]) > 0) {
                                     return (
                                     <ActiveTaskView 
                                         key={index}
-                                        day={day}
+                                        date={date}
                                         task={task}
                                         set_done={set_done}
                                         set_remark={set_remark}>
@@ -294,17 +308,18 @@ function DayView({
                 <DayNameView
                     title={weekday}
                     index={index}
+                    date={date}
                     set_day={set_day}>
                 </DayNameView>
                 <div className="rounded-xl mt-2 bg-[#18181b] grow">
                     <div className="mx-2">
                         {all_tasks.map((task: any, index: number) => {
-                            if ((day in task) && ("done" in task[day])) {
-                                if (parseFloat(task[day]["done"]) > 0) {
+                            if ((date in task) && ("done" in task[date])) {
+                                if (parseFloat(task[date]["done"]) > 0) {
                                     return (
                                     <ActiveTaskView 
                                         key={index}
-                                        day={day}
+                                        date={date}
                                         task={task}
                                         set_done={set_done}
                                         set_remark={set_remark}
@@ -323,6 +338,7 @@ function DayView({
 }
 
 export default function Today() {
+    let weekday = new Date().toLocaleDateString('en-US', {year: 'numeric', month: '2-digit', day: '2-digit'})
     const [day, set_day] = useState<number>(0)
     const [week, set_week] = useState([])
     const [all_tasks, set_all_tasks] = useState<any>([]);
@@ -347,7 +363,8 @@ export default function Today() {
                 for (let t of all_tasks) {
                     let t_copy = t
                     if (((t.name === task) || (t.tag === task))) {
-                        t_copy[today] = {"done": "0.1", "done_days": "0.1"}
+                        t_copy[today] = {"done": 0.1}
+                        t_copy["done_days"] = t.done_days + 0.1; 
                         updated_tasks.push(t_copy)
                     } else {
                         updated_tasks.push(t)
@@ -361,25 +378,13 @@ export default function Today() {
 
     useEffect(() => {
         if (remark != "") {
-            let updated_tasks = []
-            for (let t of all_tasks) {
-                if (t.index === remark[0]) {
-                    let t_copy = JSON.parse(JSON.stringify(t))
-                    if (today in t_copy) {
-                        if ("remark" in t_copy[today]) {
-                            t_copy[today]["remark"].push([remark[1], remark[2]])
-                        } else {
-                            t_copy[today]["remark"] = [[remark[1], remark[2]]]
-                        }
-                    } else {
-                        t_copy[today] = {"remark": [[remark[1], remark[2]]]}
-                    }
-                    updated_tasks.push(t_copy)
-                } else {
-                    updated_tasks.push(t)
-                }
+            let updated_remarks = {
+                "task_id" : remark[0],
+                "date" : weekday,
+                "time" : remark[1],
+                "remark" : remark[2]
             }
-        update_tasks(updated_tasks, set_all_tasks)
+        update_remarks(updated_remarks)
         set_remark("")
         }
     }, [remark])
@@ -390,8 +395,14 @@ export default function Today() {
             for (let t of all_tasks) {
                 if (t.index === done[0]) {
                     let t_copy = JSON.parse(JSON.stringify(t))
-                    t_copy["done_days"] = t_copy["done_days"] - t_copy[done[1]]["done"] + done[2]
+                    let done_days = Number(parseFloat(t["done_days"] - t_copy[done[1]]["done"] + done[2]).toFixed(1))
+                    t_copy["done_days"] = done_days
                     t_copy[done[1]]["done"] = done[2]
+                    if (done_days > 0) {
+                        t_copy["status"] = "Ongoing"
+                    } else {
+                        t_copy["status"] = "Planned"
+                    }
                     updated_tasks.push(t_copy)
                 } else {
                     updated_tasks.push(t)
@@ -408,9 +419,10 @@ export default function Today() {
     return (
     <div>
         <div className="flex grid grid-cols-5 mx-4 justify-stretch h-screen flex-row">
-            {week.map((day: any, index: number) => 
+            {week.map((date: any, index: number) => 
                 <DayView 
-                    day={day} 
+                    day={day}
+                    date={date} 
                     key={index} 
                     index={index}
                     task={task} 

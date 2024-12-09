@@ -9,7 +9,8 @@ import {
 import {
   CircleUserRound,
   List,
-  Calendar
+  Calendar,
+  MessageSquareText 
 } from 'lucide-react'
 import { 
   Separator 
@@ -53,6 +54,9 @@ function DesktopNav() {
         </NavItem>
         <NavItem href="/today" label="Today">
             <Calendar className="h-5 w-5"/>
+        </NavItem>
+        <NavItem href="/remarks" label="Remarks">
+            <MessageSquareText className="h-5 w-5"/>
         </NavItem>
       </nav>
     </aside>
