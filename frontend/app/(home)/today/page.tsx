@@ -3,6 +3,11 @@
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { SearchBox } from "./searchbox";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 import { 
     useEffect, 
     useState 
@@ -20,6 +25,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { 
+    get_remarks,
     get_tasks,
     update_remarks,
     update_tasks
@@ -50,14 +56,14 @@ function get_week_dates(day: number, set_week:any) {
     set_week(week)
 }
 
-function get_todays_contri (date: any, tasks: any){
-    let todays_contri = 0
+function get_days_contri (date: any, tasks: any){
+    let days_contri = 0
     for (let task of tasks) {
         if ((date in task) && ("done" in task[date])) {
-            todays_contri = todays_contri + parseFloat(task[date]["done"]);
+            days_contri = days_contri + parseFloat(task[date]["done"]);
         }
     }
-    return todays_contri
+    return days_contri
 }
 
 function PopoverRemark({
@@ -69,16 +75,24 @@ function PopoverRemark({
     return (
     <Popover>
         <PopoverTrigger asChild>
-            <Button variant="ghost" size="icon" className="m-2">
+            <Button variant="ghost" size="icon">
                 <MessageSquareText className="h-3.5 w-3.5" color="#52525b"/>
             </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-80 bg-black border-[#41274f] border-2">
-            <Input
+        <PopoverContent className="flex self-center h-40 w-80 bg-black">
+            <textarea
                 id="comment"
                 defaultValue="Add Comment"
-                className="h-8 w-full"
-                type="text" 
+                className="w-full bg-black p-1"
+                style={{
+                  whiteSpace: "pre-wrap",
+                  wordBreak: "break-word",
+                  overflowWrap: "break-word",
+                  resize: "none",
+                  color: "#9CA3AF",
+                  fontSize: "14px",
+                  fontFamily: "Arial, sans-serif"
+                }}
                 onKeyDown ={e => {
                         if (e.key === "Enter") {
                             let now = new Date().toLocaleTimeString()
@@ -106,10 +120,10 @@ function PopoverDone({
                 <Timer className="h-3.5 w-3.5" color="#52525b"/>
             </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-fit bg-black border-[#41274f] border-2">
+        <PopoverContent className="w-fit bg-black border-[#41274f]">
             <Input
                 id="time_spent"
-                className="h-6 w-min m-2 align-self-center justify-end border-[#41274f]"
+                className="w-min align-self-center justify-end border-[#41274f]"
                 type="range"
                 min="0" max="1" step="0.1"
                 value={task[date]["done"]}
@@ -207,38 +221,38 @@ function ActiveTaskView({
     set_done: any;
     set_remark: any;
 }) {
-    let task_view_height = window.innerHeight * 10/12;
     return (
-        <div className="rounded-md bg-black border-l-4 border-[#41274f] my-1 hover:border-2 hover:border-white" 
-            style={{ height: (task[date]["done"] * task_view_height) }}>
-            <div className="flex flex-row justify-between">
-                <TaskNameView 
-                    task_done={task[date]["done"]} 
-                    task_name={task.name}>
-                </TaskNameView>
-                <PopoverRemark 
-                    task={task} 
-                    set_remark={set_remark}>
-                </PopoverRemark>
-            </div>
-            <div className="flex flex-row justify-between ml-2 mb-2 pb-1">
-                <div className="flex flex-row">
-                    <Button variant="ghost" size="icon" className="m-0">
-                        <Tag className="h-3.5 w-3.5" color="#52525b"/> 
-                    </Button>
-                    <p className="text-xs self-center" color="#52525b">{task.tag}</p>
-                </div>
-                <div className="flex flex-row">
-                    <PopoverDone 
-                        date={date} 
+        <Card className="hover:border-2 hover:border-[#9b9cb5] h-full">
+          <CardHeader>
+            <CardTitle className="font-sans text-white">
+                <div className="flex flex-row justify-between">
+                    <p>{task.name}</p>
+                    <PopoverRemark 
                         task={task} 
-                        set_done={set_done}>
-                    </PopoverDone>
-                    <div className="w-1"></div>
-                    <p className="text-xs self-center mr-2" color="#52525b">{task[date]["done"]}</p>
+                        set_remark={set_remark}>
+                    </PopoverRemark>
+              </div>
+            </CardTitle>
+            <div>
+                <div className="flex flex-row justify-between">
+                    <div className="flex flex-row self-top">
+                        <Button variant="ghost" size="icon" className="m-0">
+                            <Tag className="h-3.5 w-3.5" color="#52525b"/> 
+                        </Button>
+                        <p className="text-xs pt-1 self-top text-zinc-400">{task.tag}</p>
+                    </div>
+                    <div className="flex flex-row self-top">
+                        <PopoverDone 
+                            date={date} 
+                            task={task} 
+                            set_done={set_done}>
+                        </PopoverDone>
+                        <p className="text-xs pt-1 self-top text-zinc-400">{task[date]["done"]}</p>
+                    </div>
                 </div>
             </div>
-        </div>
+          </CardHeader>
+        </Card>
     )
 }
 
@@ -273,19 +287,12 @@ function DayView({
                     date={date}
                     set_day={set_day}>
                 </DayNameView>
-                <div className="rounded-xl mt-2 bg-[#18181b] grow">
-                    <div className="p-2 w-full">
-                        <SearchBox 
-                            suggestions={all_tasks} 
-                            value={task} 
-                            set_value={set_task}>
-                        </SearchBox>
-                    </div>
-                    <div className="mx-2">
-                        {all_tasks.map((task: any, index: number) => {
-                            if ((date in task) && ("done" in task[date])) {
-                                if (parseFloat(task[date]["done"]) > 0) {
-                                    return (
+                <div style={{ display: 'flex', flexDirection: 'column', height: '80vh'}}>
+                    {all_tasks.map((task: any, index: number) => {
+                        if ((date in task) && ("done" in task[date])) {
+                            if (parseFloat(task[date]["done"]) > 0) {
+                                return (
+                                <div style={{flex: task[date]["done"]}}>
                                     <ActiveTaskView 
                                         key={index}
                                         date={date}
@@ -293,30 +300,38 @@ function DayView({
                                         set_done={set_done}
                                         set_remark={set_remark}>
                                     </ActiveTaskView> 
-                                    )
-                                }
+                                </div>
+                                )
                             }
                         }
-                        )}
-                    </div>
+                    }
+                    )}
+                </div>
+                <div className="w-full my-3">
+                    <SearchBox 
+                        suggestions={all_tasks} 
+                        date={date}
+                        value={task} 
+                        set_value={set_task}>
+                    </SearchBox>
                 </div>
             </div>
         )
     } else {
         return (
-            <div className="flex rounded-xl justify-self-center w-11/12 my-2 flex-col grow">
+            <div className="flex rounded-xl justify-self-center w-11/12 my-2 flex-col h-100vh">
                 <DayNameView
                     title={weekday}
                     index={index}
                     date={date}
                     set_day={set_day}>
                 </DayNameView>
-                <div className="rounded-xl mt-2 bg-[#18181b] grow">
-                    <div className="mx-2">
-                        {all_tasks.map((task: any, index: number) => {
-                            if ((date in task) && ("done" in task[date])) {
-                                if (parseFloat(task[date]["done"]) > 0) {
-                                    return (
+                <div style={{ display: 'flex', flexDirection: 'column', height: '80vh'}}>
+                    {all_tasks.map((task: any, index: number) => {
+                        if ((date in task) && ("done" in task[date])) {
+                            if (parseFloat(task[date]["done"]) > 0) {
+                                return (
+                                <div style={{flex: task[date]["done"]}} className="py-1">
                                     <ActiveTaskView 
                                         key={index}
                                         date={date}
@@ -325,12 +340,20 @@ function DayView({
                                         set_remark={set_remark}
                                         >
                                     </ActiveTaskView> 
-                                    )
-                                }
+                                </div>
+                                )
                             }
                         }
-                        )}
-                    </div>
+                    }
+                    )}
+                </div>
+                <div className="w-full my-3">
+                    <SearchBox 
+                        suggestions={all_tasks} 
+                        date={date}
+                        value={task} 
+                        set_value={set_task}>
+                    </SearchBox>
                 </div>
             </div>
         )
@@ -345,10 +368,12 @@ export default function Today() {
     const [task, set_task] = useState<any>("")
     const [remark, set_remark] = useState<any>("")
     const [done, set_done] = useState<any>("")
+    const [all_remarks, set_all_remarks] = useState<any>([]);
 
     useEffect(() => {
         set_day(0)
         get_tasks(set_all_tasks)
+        get_remarks(set_all_remarks)
     }, []);
 
     useEffect(() => {
@@ -357,13 +382,13 @@ export default function Today() {
 
     useEffect(() => {
         if (task != "") {
-            let todays_contri = get_todays_contri(today, all_tasks)
-            if (todays_contri < 1) {
+            let days_contri = get_days_contri(task[0], all_tasks)
+            if (days_contri < 1) {
                 let updated_tasks = []
                 for (let t of all_tasks) {
                     let t_copy = t
-                    if (((t.name === task) || (t.tag === task))) {
-                        t_copy[today] = {"done": 0.1}
+                    if (((t.name === task[1]) || (t.tag === task[1]))) {
+                        t_copy[task[0]] = {"done": 0.1}
                         t_copy["done_days"] = t.done_days + 0.1; 
                         updated_tasks.push(t_copy)
                     } else {
@@ -378,14 +403,24 @@ export default function Today() {
 
     useEffect(() => {
         if (remark != "") {
-            let updated_remarks = {
+            let updated_remarks = [];
+            let new_remark_id = 0;
+            if (all_remarks) {
+                for (let r of all_remarks) {
+                    updated_remarks.push(r);
+                    new_remark_id = r.index + 1;
+                } 
+            }
+            let new_remark = {
+                "index" : new_remark_id,
                 "task_id" : remark[0],
                 "date" : weekday,
                 "time" : remark[1],
                 "remark" : remark[2]
             }
-        update_remarks(updated_remarks)
-        set_remark("")
+            updated_remarks.push(new_remark);
+            update_remarks(updated_remarks);
+            set_remark("");
         }
     }, [remark])
 
@@ -408,8 +443,8 @@ export default function Today() {
                     updated_tasks.push(t)
                 }
             }
-            let todays_contri = get_todays_contri(done[1], updated_tasks)
-            if (todays_contri <= 1) {
+            let days_contri = get_days_contri(done[1], updated_tasks)
+            if (days_contri <= 1) {
                 update_tasks(updated_tasks, set_all_tasks)
             }
         set_done("")
@@ -418,7 +453,7 @@ export default function Today() {
 
     return (
     <div>
-        <div className="flex grid grid-cols-5 mx-4 justify-stretch h-screen flex-row">
+        <div className="flex grid grid-cols-5 my-4 mx-4 justify-stretch h-screen flex-row">
             {week.map((date: any, index: number) => 
                 <DayView 
                     day={day}

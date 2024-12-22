@@ -23,10 +23,12 @@ import {
 } from "@/components/ui/popover"
 
 export function SearchBox({
+    date,
     suggestions,
     value,
     set_value
 }: {
+    date: any;
     suggestions: any;
     value: any;
     set_value: any;
@@ -42,8 +44,8 @@ export function SearchBox({
           aria-expanded={open}
           className="w-full justify-between"
         >
-          {value
-            ? suggestions.find((task: any) => task.name === value).name
+          {value[1]
+            ? suggestions.find((task: any) => task.name === value[1]).name
             : "Add Task"}
           <ListPlus className="ml-2 h-5 w-5 shrink-0 opacity-100" />
         </Button>
@@ -59,7 +61,7 @@ export function SearchBox({
                   key={index}
                   value={task.name}
                   onSelect={(currentValue) => {
-                    set_value(currentValue)
+                    set_value([date, currentValue])
                     set_open(false)
                   }}
                 >

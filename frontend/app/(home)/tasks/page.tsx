@@ -75,6 +75,10 @@ export default function Tasks() {
         const handleKeyPress = (event: KeyboardEvent) => {
           if (((event.key === '/') || (event.key === ':')) && searchRef.current) {
             searchRef.current.focus();
+          } else {
+            if ((event.key === 'Escape') && searchRef.current) {
+                searchRef.current.value = "";
+            }
           }
         };
 
@@ -176,7 +180,6 @@ export default function Tasks() {
                 //Add the new task into database
                 let updated_tasks = all_tasks
                 updated_tasks.push(new_task)
-                console.log(name)
                 update_tasks(updated_tasks, set_all_tasks);
 
                 //Add the task to current view
@@ -189,24 +192,8 @@ export default function Tasks() {
     //Task View
     let task_category = ["Planned", "Ongoing", "Completed"]
     return (
-    <div>
-        <div className="flex px-8 pt-4 justify-center">
-            <Input
-                ref={searchRef}
-                placeholder="Search/Add Tasks"
-                autoFocus
-                onChange={(event) => 
-                    filter_tasks(event.target.value, all_tasks, set_tasks)
-                }
-                onKeyDown={(event) => {
-                    if (event.key === 'Enter') {
-                        set_task_add(event.currentTarget.value);
-                    }
-                }}
-                className="h-12 w-11/12 border-2 hover:border-[#9b9cb5] hover:border-3"
-            />
-        </div>
-        <div className="flex justify-around grid gap-y-4 pt-2 pb-4 px-12 grid-cols-3">
+    <div className="fixed top-0 left-10 w-full h-full bg-black" style={{ display: 'flex', flexDirection: 'column', height: '100vh'}}>
+        <div className="flex justify-around grid gap-y-4 pb-4 px-12 grid-cols-3 h-full overflow-y-auto">
             {task_category.map((category: any, index: number) => {
                 return (
                 <div key={index}>
@@ -234,6 +221,22 @@ export default function Tasks() {
                 </div>
                 )
             })}
+        </div>
+        <div className="py-4 w-full bottom-0 flex justify-center bg-black" style={{flex: 1}}>
+            <Input
+                ref={searchRef}
+                placeholder="Search/Add Tasks"
+                autoFocus
+                onChange={(event) => 
+                    filter_tasks(event.target.value, all_tasks, set_tasks)
+                }
+                onKeyDown={(event) => {
+                    if (event.key === 'Enter') {
+                        set_task_add(event.currentTarget.value);
+                    }
+                }}
+                className="h-12 w-11/12 border-2 hover:border-[#9b9cb5] hover:border-3"
+            />
         </div>
     </div>
     )

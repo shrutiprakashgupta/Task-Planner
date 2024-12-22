@@ -34,14 +34,8 @@ def remarks():
         return read_remarks()
 
 def update_remarks(response):
-    remarks_data = []
-    with open("data/remarks.json", "r") as remarks:
-        remarks_data = json.load(remarks) 
-        print(remarks_data)
-        remarks.close()
-    remarks_data.append(response)
     with open("data/remarks.json", "w") as remarks:
-        json.dump(remarks_data, remarks)
+        json.dump(response, remarks)
         remarks.close()
     return "Remarks Updated"
 
