@@ -59,3 +59,58 @@ export async function update_remarks(updated_remarks: any) {
         console.log(error)
     }
 }
+
+//Function to color code Tasks based on Tag
+export async function get_tag_colors(all_entries: any, set_colors: any) {
+    let all_colors = [
+        "border-red-500",
+        "border-yellow-500",
+        "border-lime-500",
+        "border-orange-500",
+        "border-teal-500",
+        "border-blue-500",
+        "border-purple-500",
+        "border-amber-500",
+        "border-green-500",
+        "border-fuchsia-500",
+        "border-pink-500",
+        "border-red-900",
+        "border-yellow-900",
+        "border-lime-900",
+        "border-orange-900",
+        "border-teal-900",
+        "border-blue-900",
+        "border-purple-900",
+        "border-amber-900",
+        "border-green-900",
+        "border-fuchsia-900",
+        "border-pink-900",
+        "border-red-200",
+        "border-yellow-200",
+        "border-lime-200",
+        "border-orange-200",
+        "border-teal-200",
+        "border-blue-200",
+        "border-purple-200",
+        "border-amber-200",
+        "border-green-200",
+        "border-fuchsia-200",
+        "border-pink-200"
+    ];
+    let i = 0; 
+    let colors: { [key: string]: string } = { "New Task": "border-white" };
+
+    for (let elem of all_entries) {
+        if (!(elem.tag in colors)) {
+            // Add a new color only if it doesn't already exist
+            colors[elem.tag] = all_colors[i];
+            i++;
+
+            // Reset index if colors run out (optional)
+            if (i >= all_colors.length) {
+                i = 0; // Start reusing colors
+            }
+        }
+    }
+    set_colors(colors);
+}

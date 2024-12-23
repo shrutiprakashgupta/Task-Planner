@@ -12,6 +12,7 @@ import {
     useRef
 } from "react";
 import { 
+    get_tag_colors,
     get_tasks,
     update_tasks  
 } from "../utils";
@@ -54,6 +55,7 @@ function CategoryView({
 export default function Tasks() {
     const [all_tasks, set_all_tasks] = useState<any>([]);
     const [tasks, set_tasks] = useState<any>([]);
+    const [colors, set_colors] = useState<any>([]);
     const [tag, set_tag] = useState<any>("")
     const [planned_days, set_planned_days] = useState<any>(0)
     const [planned_date, set_planned_date] = useState<any>("")
@@ -69,6 +71,10 @@ export default function Tasks() {
         get_tasks(set_all_tasks)
         get_tasks(set_tasks)
     }, []);
+
+    useEffect(() => {
+        get_tag_colors(all_tasks, set_colors);
+    }, [all_tasks])
 
     //Setup shortcut key for Search
     useEffect(() => {
@@ -162,7 +168,10 @@ export default function Tasks() {
         if (task_add != "") {
             let name = task_add
             if (name[0] === ':') {
-                let index = all_tasks.length
+                let index = 0;
+                for (let t of all_tasks) {
+                    index = t.index + 1
+                }
                 let today = new Date().toLocaleDateString()
 
                 //Initialize default values for the new task
@@ -206,6 +215,7 @@ export default function Tasks() {
                                 return (
                                     <TaskCardView task={task}
                                         key={index}
+                                        colors={colors}
                                         set_tag={set_tag}
                                         set_planned_days={set_planned_days}
                                         set_planned_date={set_planned_date}

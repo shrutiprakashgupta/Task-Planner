@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@radix-ui/react-scroll-area";
 import { Button } from "@/components/ui/button";
 import { Clock, Trash2 } from "lucide-react";
-import { get_remarks, update_remarks} from "../utils";
+import { get_remarks, get_tag_colors, update_remarks} from "../utils";
 
 function conv_timestamp(timestamp: string) {
     //Converts hh:mm:ss AM/PM into hh:mm (in 24 hour format)
@@ -45,7 +45,7 @@ function filter_remarks(
     if (control === '/') {
         var re = new RegExp(input, "i");
         let filtered_remarks = all_remarks.filter(function (remark: any) {
-            return (re.test(remark.remark));
+            return (re.test(remark.remark) || re.test(remark.task) || re.test(remark.tag));
         }
         );
         set_remarks(filtered_remarks)
@@ -65,15 +65,17 @@ function RemarkView({
     date,
     remark,
     index,
+    colors,
     set_remark_delete
 }:{ date: any;
     remark: any;
     index: number;
+    colors: any;
     set_remark_delete: any;
 }) {
         if ((date === remark["date"])) {
             return (
-                <div key={index} className="rounded-md bg-[#18181b] border-l-4 border-[#41274f] my-2 hover:border-2 hover:border-white min-w-80 w-max">
+                <div key={index} className={`rounded-md bg-[#18181b] border-l-4 ${colors[remark["tag"]]} my-2 hover:border-2 hover:border-white min-w-80 w-max`}>
                     <div className="flex flex-row justify-between">
                         <p className="flex text-xs self-center p-2 text-[#6B7280]">
                             {remark["tag"]} : {remark["task"]}
@@ -97,9 +99,11 @@ function RemarkView({
 function DayView({
     date,
     remarks,
+    colors,
     set_remark_delete
 }:{ date: any;
     remarks: any;
+    colors: any;
     set_remark_delete: any;
 }) {
     return (
@@ -113,6 +117,7 @@ function DayView({
                     date={date}
                     remark={remark} 
                     index={index}
+                    colors={colors}
                     set_remark_delete={set_remark_delete}>
                 </RemarkView>
             )}
@@ -125,6 +130,7 @@ export default function Remarks() {
     const [all_remarks, set_all_remarks] = useState<any>([]);
     const [remarks, set_remarks] = useState<any>([]);
     const [dates, set_dates] = useState<any>([]);
+    const [colors, set_colors] = useState<any>([]);
     const [remark_delete, set_remark_delete] = useState<any>([]);
     const searchRef = useRef<HTMLInputElement>(null);
 
@@ -136,6 +142,7 @@ export default function Remarks() {
 
     useEffect(() => {
         set_remarks(all_remarks)
+        get_tag_colors(all_remarks, set_colors)
     }, [all_remarks])
 
     useEffect(() => {
@@ -191,6 +198,7 @@ export default function Remarks() {
                                 date={date}
                                 key={index}
                                 remarks={remarks}
+                                colors={colors}
                                 set_remark_delete={set_remark_delete}>
                             </DayView>
                         )    

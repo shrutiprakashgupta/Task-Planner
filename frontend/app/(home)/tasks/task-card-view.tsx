@@ -138,6 +138,7 @@ function AnalyticsView({
 
 export default function TaskCardView({
   task,
+  colors,
   set_tag,
   set_planned_days,
   set_planned_date,
@@ -147,6 +148,7 @@ export default function TaskCardView({
   set_task_delete
 }: {
   task: any;
+  colors: any;
   set_tag: any;
   set_planned_days: any;
   set_planned_date: any;
@@ -157,7 +159,8 @@ export default function TaskCardView({
 }) {
 
     return (
-        <Card className="my-3 hover:border-2 hover:border-[#9b9cb5]">
+        // <Card className="my-3 hover:border-2 hover:border-[#9b9cb5]">
+        <Card className={`border-0 border-l-2 ${colors[task["tag"]]} hover:border-2 hover:border-[#9b9cb5] my-3`}>
           <CardHeader>
             <CardTitle className="font-sans text-white">
               <div className="flex flex-row justify-between">
