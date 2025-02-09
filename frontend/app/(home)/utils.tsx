@@ -30,8 +30,12 @@ export async function get_remarks(set_remarks: any) {
         let remark_copy;
         let remarks_json_extd = remarks_json && remarks_json.map((remark: any, index: number) => {
             remark_copy = remark;
-            remark_copy.tag = tasks_json[remark["task_id"]]["tag"];
-            remark_copy.task = tasks_json[remark["task_id"]]["name"];
+            for (let task of tasks_json) {
+                if (task["index"] === remark["task_id"]) {
+                    remark_copy.tag = task["tag"];
+                    remark_copy.task = task["name"];
+                }
+            }
             return remark_copy
         });
         set_remarks(remarks_json_extd);

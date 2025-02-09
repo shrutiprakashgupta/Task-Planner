@@ -8,9 +8,12 @@ import {
 } from '@/components/ui/tooltip';
 import {
   CircleUserRound,
-  List,
-  Calendar,
-  MessageSquareText 
+  CalendarPlus,
+  MessageCircleMore,
+  NotebookPen,
+  Gamepad2,
+  ChartNoAxesCombined,
+  FileSearch,
 } from 'lucide-react'
 import { 
   Separator 
@@ -50,13 +53,19 @@ function DesktopNav() {
         </NavItem>
         <Separator></Separator>
         <NavItem href="/tasks" label="Tasks">
-            <List className="h-5 w-5"/>
+            <FileSearch className="h-5 w-5 bg-black"/>
         </NavItem>
         <NavItem href="/today" label="Today">
-            <Calendar className="h-5 w-5"/>
+            <CalendarPlus className="h-5 w-5 bg-black"/>
         </NavItem>
         <NavItem href="/remarks" label="Remarks">
-            <MessageSquareText className="h-5 w-5"/>
+            <MessageCircleMore className="h-5 w-5 bg-black"/>
+        </NavItem>
+        <NavItem href="/reports" label="Reports">
+            <NotebookPen className="h-5 w-5 bg-black"/>
+        </NavItem>
+        <NavItem href="/games" label="Games">
+            <Gamepad2 className="h-5 w-5 bg-black"/>
         </NavItem>
       </nav>
     </aside>

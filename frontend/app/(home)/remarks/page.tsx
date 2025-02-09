@@ -133,6 +133,7 @@ export default function Remarks() {
     const [colors, set_colors] = useState<any>([]);
     const [remark_delete, set_remark_delete] = useState<any>([]);
     const searchRef = useRef<HTMLInputElement>(null);
+    const scrollRef = useRef<HTMLDivElement>(null);
 
     //Read all remarks from backend
     useEffect(() => {
@@ -147,6 +148,13 @@ export default function Remarks() {
 
     useEffect(() => {
         get_dates(set_dates, remarks)
+    }, [remarks]);
+
+    // Scroll to the bottom when the component mounts
+    useEffect(() => {
+        if (scrollRef.current) {
+          scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+        }
     }, [remarks]);
 
     //Setup shortcut key for Search
@@ -190,7 +198,8 @@ export default function Remarks() {
     return (
         <div className="fixed top-0 left-20 w-full bg-black pt-4 flex flex-col" style={{ display: 'flex', flexDirection: 'column', height: '100vh'}}>
             <ScrollArea className="overflow-y-auto justify-bottom"
-                        style={{flex: 10}}>
+                        style={{flex: 10}}
+                        ref={scrollRef}>
                 {dates && dates.map((date: any, index: number) => {
                     if (date != "Duplicate") {
                         return (
