@@ -26,10 +26,8 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { 
-    get_remarks,
     get_tag_colors,
     get_tasks,
-    update_remarks,
     update_tasks
  } from "../utils";
 
@@ -66,45 +64,6 @@ function get_days_contri (date: any, tasks: any){
         }
     }
     return days_contri
-}
-
-function PopoverRemark({
-    task, 
-    set_remark
-}:{ task: any;
-    set_remark: any;
-}) {
-    return (
-    <Popover>
-        <PopoverTrigger asChild>
-            <Button variant="ghost" size="icon">
-                <MessageSquareText className="h-3.5 w-3.5 hover:fill-zinc-300 hover:border-zinc-800" color="#52525b"/>
-            </Button>
-        </PopoverTrigger>
-        <PopoverContent className="flex self-center h-40 w-80 bg-black">
-            <textarea
-                id="comment"
-                defaultValue="Add Comment"
-                className="w-full bg-black p-1"
-                style={{
-                  whiteSpace: "pre-wrap",
-                  wordBreak: "break-word",
-                  overflowWrap: "break-word",
-                  resize: "none",
-                  color: "#9CA3AF",
-                  fontSize: "14px",
-                  fontFamily: "Arial, sans-serif"
-                }}
-                onKeyDown ={e => {
-                        if (e.key === "Enter") {
-                            let now = new Date().toLocaleTimeString()
-                            set_remark([task.index, now, (e.target as HTMLInputElement).value])
-                        }
-                }}
-            />
-        </PopoverContent>
-    </Popover>
-  )
 }
 
 function PopoverDone({
@@ -218,13 +177,11 @@ function ActiveTaskView({
     task, 
     colors,
     set_done,
-    set_remark,
     set_complete
 }:{ date: any;
     task: any; 
     colors: any;
     set_done: any;
-    set_remark: any;
     set_complete: any;
 }) {
     let task_done = (task.status == "Completed") ? "fill-green-300" : "";
@@ -238,10 +195,6 @@ function ActiveTaskView({
                         <Button variant="ghost" size="icon" onClick={() => set_complete(task.index)}>
                             <SquareCheckBig className={`h-3.5 w-3.5 ${task_done} hover:fill-green-300 hover:border-green-800`} color="#52525b"/>
                         </Button>
-                        <PopoverRemark 
-                            task={task} 
-                            set_remark={set_remark}>
-                        </PopoverRemark>
                     </div>
               </div>
             </CardTitle>
@@ -277,7 +230,6 @@ function DayView({
     set_day,
     set_task,
     set_done,
-    set_remark,
     set_complete,
     all_tasks, 
 }:{ day: number;
@@ -288,7 +240,6 @@ function DayView({
     set_day: any;
     set_task: any;
     set_done: any;
-    set_remark: any;
     set_complete: any;
     all_tasks: any; 
 }) {
@@ -315,7 +266,6 @@ function DayView({
                                         task={task}
                                         colors={colors}
                                         set_done={set_done}
-                                        set_remark={set_remark}
                                         set_complete={set_complete}>
                                     </ActiveTaskView> 
                                 </div>
@@ -356,7 +306,6 @@ function DayView({
                                         task={task}
                                         colors={colors}
                                         set_done={set_done}
-                                        set_remark={set_remark}
                                         set_complete={set_complete}>
                                     </ActiveTaskView> 
                                 </div>
@@ -386,15 +335,12 @@ export default function Today() {
     const [colors, set_colors] = useState([]);
     const [all_tasks, set_all_tasks] = useState<any>([]);
     const [task, set_task] = useState<any>("");
-    const [remark, set_remark] = useState<any>("");
     const [done, set_done] = useState<any>("");
     const [complete, set_complete] = useState<any>("");
-    const [all_remarks, set_all_remarks] = useState<any>([]);
 
     useEffect(() => {
         set_day(0)
         get_tasks(set_all_tasks)
-        get_remarks(set_all_remarks)
     }, []);
 
     useEffect(() => {
@@ -425,29 +371,6 @@ export default function Today() {
             set_task("")
         }
     }, [task]);
-
-    useEffect(() => {
-        if (remark != "") {
-            let updated_remarks = [];
-            let new_remark_id = 0;
-            if (all_remarks) {
-                for (let r of all_remarks) {
-                    updated_remarks.push(r);
-                    new_remark_id = r.index + 1;
-                } 
-            }
-            let new_remark = {
-                "index" : new_remark_id,
-                "task_id" : remark[0],
-                "date" : weekday,
-                "time" : remark[1],
-                "remark" : remark[2]
-            }
-            updated_remarks.push(new_remark);
-            update_remarks(updated_remarks);
-            set_remark("");
-        }
-    }, [remark])
 
     useEffect(() => {
         if (done != "") {
@@ -508,7 +431,6 @@ export default function Today() {
                     set_day={set_day}
                     set_task={set_task} 
                     set_done={set_done}
-                    set_remark={set_remark}
                     set_complete={set_complete}
                     all_tasks={all_tasks}>
                 </DayView>

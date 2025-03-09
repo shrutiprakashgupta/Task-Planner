@@ -14,9 +14,12 @@ import {
 import { 
     get_tag_colors,
     get_tasks,
-    update_tasks  
+    update_tasks,
+    backup_tasks
 } from "../utils";
 import TaskCardView from "./task-card-view"
+import { Button } from "@/components/ui/button";
+import { DatabaseBackup } from "lucide-react";
 
 function filter_tasks(
     pattern: string, 
@@ -65,6 +68,7 @@ export default function Tasks() {
     const [task_delete, set_task_delete] = useState<any>(0)
     const [task_add, set_task_add] = useState<any>(0)
     const searchRef = useRef<HTMLInputElement>(null);
+    const [backup, set_backup] = useState<any>(0);
 
     //Read all data from backend
     useEffect(() => {
@@ -198,6 +202,13 @@ export default function Tasks() {
         }
     }, [task_add])
 
+    //Backup all Task Data
+    useEffect (() => {
+        if (backup != "") {
+            backup_tasks(all_tasks)
+        }
+    }, [backup])
+    
     //Task View
     let task_category = ["Planned", "Ongoing", "Completed"]
     return (
@@ -232,21 +243,26 @@ export default function Tasks() {
                 )
             })}
         </div>
-        <div className="py-4 w-full bottom-0 flex justify-center bg-black" style={{flex: 1}}>
-            <Input
-                ref={searchRef}
-                placeholder="Search/Add Tasks"
-                autoFocus
-                onChange={(event) => 
-                    filter_tasks(event.target.value, all_tasks, set_tasks)
-                }
-                onKeyDown={(event) => {
-                    if (event.key === 'Enter') {
-                        set_task_add(event.currentTarget.value);
+        <div className="flex flex-row align-middle py-4 pl-16 justify-self-center">
+            <Button variant="outline" size="default" className="h-12 border-2 hover:border-[#9b9cb5]" onClick={() => set_backup(1)}>
+                <DatabaseBackup color="#52525b" />
+            </Button>
+            <div className="w-full bottom-0 flex bg-black">
+                <Input
+                    ref={searchRef}
+                    placeholder="Search/Add Tasks"
+                    autoFocus
+                    onChange={(event) => 
+                        filter_tasks(event.target.value, all_tasks, set_tasks)
                     }
-                }}
-                className="h-12 w-11/12 border-2 hover:border-[#9b9cb5] hover:border-3"
-            />
+                    onKeyDown={(event) => {
+                        if (event.key === 'Enter') {
+                            set_task_add(event.currentTarget.value);
+                        }
+                    }}
+                    className="h-12 w-11/12 border-2 hover:border-[#9b9cb5] hover:border-3"
+                />
+            </div>
         </div>
     </div>
     )

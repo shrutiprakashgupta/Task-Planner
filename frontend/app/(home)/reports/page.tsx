@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Save, RefreshCw, Clipboard} from "lucide-react";
-import { get_tasks, update_remarks, update_tasks} from "../utils";
+import { get_tasks, update_tasks} from "../utils";
 
 let today = new Date().toLocaleDateString("en-CA");
 
@@ -227,7 +227,7 @@ function CopyableTable ({
 };
 
 
-export default function Remarks() {
+export default function Reports() {
 
     const [all_tasks, set_all_tasks] = useState<any>([]);
     const [startDate, setStartDate] = useState<string>("");

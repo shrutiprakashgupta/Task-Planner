@@ -64,9 +64,6 @@ function DesktopNav() {
         <NavItem href="/reports" label="Reports">
             <NotebookPen className="h-5 w-5 bg-black"/>
         </NavItem>
-        <NavItem href="/games" label="Games">
-            <Gamepad2 className="h-5 w-5 bg-black"/>
-        </NavItem>
       </nav>
     </aside>
   );

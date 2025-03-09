@@ -25,32 +25,19 @@ export async function get_remarks(set_remarks: any) {
     try {
         let remarks = await fetch('http://127.0.0.1:5000/remarks');
         let remarks_json = await remarks.json();
-        let tasks = await fetch('http://127.0.0.1:5000/tasks');
-        let tasks_json = await tasks.json();
-        let remark_copy;
-        let remarks_json_extd = remarks_json && remarks_json.map((remark: any, index: number) => {
-            remark_copy = remark;
-            for (let task of tasks_json) {
-                if (task["index"] === remark["task_id"]) {
-                    remark_copy.tag = task["tag"];
-                    remark_copy.task = task["name"];
-                }
-            }
-            return remark_copy
-        });
-        set_remarks(remarks_json_extd);
+        set_remarks(remarks_json);
     } catch (error) {
         console.log(error)
     }
 }
 
 export async function update_remarks(updated_remarks: any) {
-    let remark_copy = {index: 0, remark: "test", time: 0, date: 0, task_id: 0};
+    let remark_copy = {index: 0, remark: "test", time: 0, date: 0, ai: 0, ai_done: 0};
     let updated_remarks_json = [];
     if (updated_remarks) {
         for (let r of updated_remarks) {
-            remark_copy = {index: 0, remark: "test", time: 0, date: 0, task_id: 0};
-            remark_copy = {index: r.index, remark: r.remark, time: r.time, date: r.date, task_id: r.task_id};
+            remark_copy = {index: 0, remark: "test", time: 0, date: 0, ai: 0, ai_done: 0};
+            remark_copy = {index: r.index, remark: r.remark, time: r.time, date: r.date, ai: r.ai, ai_done: r.ai_done};
             updated_remarks_json.push(remark_copy);
         }
     }
@@ -117,4 +104,15 @@ export async function get_tag_colors(all_entries: any, set_colors: any) {
         }
     }
     set_colors(colors);
+}
+
+export async function backup_tasks(all_tasks: any) {
+    try {
+        let response = await fetch('http://127.0.0.1:5000/tasks_backup', 
+                    {method: "POST", 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify(all_tasks)});
+    } catch (error) {
+        console.log(error)
+    }
 }
