@@ -187,6 +187,7 @@ function ActiveTaskView({
     let task_done = (task.status == "Completed") ? "fill-green-300" : "";
     return (
         <Card className={`border-0 border-l-2 ${colors[task["tag"]]} hover:border-2 hover:border-[#9b9cb5] h-full`}>
+             {/* bg-gradient-to-t from-[#25162c] from-1% to-[#3b3b3b] to-99%`}> */}
           <CardHeader>
             <CardTitle className="font-sans text-white">
                 <div className="flex flex-row justify-between">
@@ -195,6 +196,7 @@ function ActiveTaskView({
                         <Button variant="ghost" size="icon" onClick={() => set_complete(task.index)}>
                             <SquareCheckBig className={`h-3.5 w-3.5 ${task_done} hover:fill-green-300 hover:border-green-800`} color="#52525b"/>
                         </Button>
+                        <p className="font-sans text-[12px] font-extralight leading-relaxed align-text-top text-zinc-400">{task.done_days}/{task.planned_days}</p>
                     </div>
               </div>
             </CardTitle>
