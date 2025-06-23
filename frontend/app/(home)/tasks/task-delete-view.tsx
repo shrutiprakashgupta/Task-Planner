@@ -22,7 +22,7 @@ export function TaskDeleteView({
         <Popover>
             <PopoverTrigger asChild>
                   <Button variant="ghost" size="icon" className="self-center">
-                      <Trash2 className="h-3.5 w-3.5 hover:fill-white hover:border-white" color="#52525b"/>
+                      <Trash2 className="h-3.5 w-3.5 hover:fill-[#F3F3E0] hover:border-[#F3F3E0]" color="#183B4E"/>
                   </Button>
             </PopoverTrigger>
             <PopoverContent className="w-50">
@@ -33,10 +33,10 @@ export function TaskDeleteView({
                       Task will be deleted permanently
                     </p>
                     <div className="flex justify-around">
-                      <Button variant="outline" className="self-center w-20 bg-red-900 hover:border-white hover:bg-red-900 gap-4" onClick={() => set_task_delete(task.index)}>
+                      <Button variant="outline" className="self-center w-20 bg-[#27548A] hover:border-[#F3F3E0] hover:bg-[#27548A] gap-4" onClick={() => set_task_delete(task.index)}>
                         Yes 
                       </Button>
-                      <Button variant="outline" className="self-center w-20 bg-green-700 hover:border-white hover:bg-green-700 gap-4" onClick={() => set_task_delete("")}>
+                      <Button variant="outline" className="self-center w-20 bg-[#DDA853] hover:border-[#F3F3E0] hover:bg-[#DDA853] gap-4" onClick={() => set_task_delete("")}>
                         No
                       </Button>
                     </div>

@@ -19,7 +19,7 @@ import {
 } from "../utils";
 import TaskCardView from "./task-card-view"
 import { Button } from "@/components/ui/button";
-import { DatabaseBackup } from "lucide-react";
+import { DatabaseBackup, CalendarPlus, CalendarCog, CalendarCheck2 } from "lucide-react";
 
 function filter_tasks(
     pattern: string, 
@@ -46,9 +46,23 @@ function CategoryView({
     status: any;
 }
 ) {
+    const getIcon = (status: string) => {
+        switch(status) {
+            case "Planned":
+                return <CalendarPlus className="h-5 w-5 text-[#DDA853]" />;
+            case "Ongoing":
+                return <CalendarCog className="h-5 w-5 text-[#DDA853]" />;
+            case "Completed":
+                return <CalendarCheck2 className="h-5 w-5 text-[#DDA853]" />;
+            default:
+                return null;
+        }
+    };
+
     return (
-        <div className="bg-[#25162c] bg-gradient-to-r from-[#25162c] via-[#41274f] to-[#25162c] rounded-xl border-4 py-2 hover:rounded-none">
-            <h2 className="text-xl font-medium tracking-wide text-center align-middle align-text-bottom text-white">
+        <div className="flex items-center gap-2 py-2">
+            {getIcon(status)}
+            <h2 className="text-xl font-medium tracking-wide text-[#F3F3E0]">
                 {status} Tasks
             </h2>
         </div>
@@ -212,20 +226,20 @@ export default function Tasks() {
     //Task View
     let task_category = ["Planned", "Ongoing", "Completed"]
     return (
-    <div className="fixed top-0 left-10 w-full h-full bg-black" style={{ display: 'flex', flexDirection: 'column', height: '100vh'}}>
-        <div className="flex justify-around grid gap-y-4 pb-4 px-12 grid-cols-3 h-full overflow-y-auto">
-            {task_category.map((category: any, index: number) => {
-                return (
-                <div key={index}>
-                    <ScrollArea className="rounded-md border p-4">
+    <div className="fixed top-0 left-8 w-full h-full bg-black" style={{ display: 'flex', flexDirection: 'column', height: '100vh'}}>
+        <div className="grid grid-cols-[2fr_auto_2fr_auto_2fr] gap-x-12 items-stretch h-full overflow-y-auto px-12 pb-4">
+            {task_category.flatMap((category: string, index: number) => {
+                const columnComponent = (
+                    <div key={`category-column-${category}`} className="flex flex-col bg-black rounded-xl py-4">
                         <CategoryView 
                             status={category}>
                         </CategoryView>
-                        {tasks.map((task: any, index: number) => {
-                            if (task.status === category) {
-                                return (
+                        <ScrollArea className="rounded-md mt-4">
+                            {tasks
+                                .filter((task: any) => task.status === category)
+                                .map((task: any) => (
                                     <TaskCardView task={task}
-                                        key={index}
+                                        key={task.index} // Assuming task.index is a unique identifier for the task
                                         colors={colors}
                                         set_tag={set_tag}
                                         set_planned_days={set_planned_days}
@@ -235,17 +249,35 @@ export default function Tasks() {
                                         set_task_update={set_task_update}
                                         set_task_delete={set_task_delete}>
                                     </TaskCardView>
-                                )
-                            }
-                        })}
-                    </ScrollArea>
-                </div>
-                )
+                                ))}
+                        </ScrollArea>
+                    </div>
+                );
+
+                if (index > 0) {
+                    // Add a separator before the second and third columns
+                    const separatorComponent = (
+                        <div key={`separator-${index}`} className="w-[2px] bg-[#DDA853]/30">
+                            {/* This separator is a grid item. items-stretch from parent grid makes it full height. */}
+                        </div>
+                    );
+                    return [separatorComponent, columnComponent];
+                }
+                
+                return [columnComponent];
             })}
         </div>
         <div className="flex flex-row align-middle py-4 pl-16 justify-self-center">
-            <Button variant="outline" size="default" className="h-12 border-2 hover:border-[#9b9cb5]" onClick={() => set_backup(1)}>
-                <DatabaseBackup color="#52525b" />
+            <Button 
+                variant="outline" 
+                size="default" 
+                className="h-12 border-2 hover:border-[#DDA853] group relative" 
+                onClick={() => set_backup(1)}
+            >
+                <DatabaseBackup color="#183B4E" />
+                <span className="absolute -top-10 left-1/2 transform -translate-x-1/2 bg-black text-white px-2 py-1 rounded text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+                    Backup
+                </span>
             </Button>
             <div className="w-full bottom-0 flex bg-black">
                 <Input
@@ -260,7 +292,7 @@ export default function Tasks() {
                             set_task_add(event.currentTarget.value);
                         }
                     }}
-                    className="h-12 w-11/12 border-2 hover:border-[#9b9cb5] hover:border-3"
+                    className="h-12 w-11/12 border-2 hover:border-[#DDA853] hover:border-3"
                 />
             </div>
         </div>

@@ -152,7 +152,7 @@ export function TaskEditView({
         <Popover>
             <PopoverTrigger asChild>
               <Button variant="ghost" size="icon" className="self-center">
-                  <Pencil className="h-3.5 w-3.5 hover:fill-white hover:border-white" color="#52525b"/>
+                  <Pencil className="h-3.5 w-3.5 hover:fill-[#F3F3E0] hover:border-[#F3F3E0]" color="#183B4E"/>
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-120">
@@ -164,7 +164,7 @@ export function TaskEditView({
                       Edit the task details here
                     </p>
                   </div>
-                  <Button variant="outline" className="self-center bg-green-700 hover:border-white hover:bg-green-700" onClick={() => set_task_update(task.index)}>
+                  <Button variant="outline" className="self-center bg-[#27548A] hover:border-[#F3F3E0] hover:bg-[#27548A]" onClick={() => set_task_update(task.index)}>
                     Save
                   </Button>
                 </div>
