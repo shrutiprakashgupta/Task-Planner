@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import { useRef } from "react";
 import { ScrollArea } from "@radix-ui/react-scroll-area";
 import { Button } from "@/components/ui/button";
-import { Trash2, Star, SquareCheckBig} from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Trash2, Star, SquareCheckBig, Calendar, Clock, Plus, Search} from "lucide-react";
 import { get_remarks, update_remarks} from "../utils";
 
 function conv_timestamp(timestamp: string) {
@@ -32,29 +33,41 @@ function get_dates(set_dates: any, remarks: any) {
     set_dates(dates)
 }
 
-function handle_remarks(
-    textinput: string, 
+function search_remarks(
+    regex: string, 
     all_remarks: any, 
     set_remarks: any,
-    set_new_remark: any
 ) {
-    let control = textinput[0]
-    let input = textinput.slice(1)
+    //Find existing remarks matching the regex
+    var re = new RegExp(regex, "i");
+    let matched_remarks = all_remarks.filter(function (remark: any) {
+        return (re.test(remark.remark));
+    });
+    set_remarks(matched_remarks)
+}
 
-    //Search in existing remarks
-    if (control === '/') {
-        var re = new RegExp(input, "i");
-        let filtered_remarks = all_remarks.filter(function (remark: any) {
-            return (re.test(remark.remark));
+function filter_remarks(
+    ais_only: boolean, 
+    pending_only: boolean, 
+    all_remarks: any, 
+    set_remarks: any
+) {
+    let filtered_remarks = all_remarks.filter(function (remark: any) {
+        if (ais_only) {
+            if (remark.ai) {
+                if (pending_only) {
+                    if (!remark.ai_done) {
+                        return remark;
+                    }
+                } else {
+                    return remark;
+                }
+            }
+        } else {
+            return remark;
         }
-        );
-        set_remarks(filtered_remarks)
-    } else {
-    //Add a new remark
-        if (control === ':') {
-            set_new_remark(input)
-        } 
-    }
+    });
+    set_remarks(filtered_remarks);
 }
 
 function RemarkView({
@@ -72,21 +85,21 @@ function RemarkView({
     set_remark_ai_done: any;
 }) {
         if ((date === remark["date"])) {
-            let is_ai = (remark.ai) ? "fill-yellow-600 border-white" : "";
-            let is_ai_done = (remark.ai_done) ? "fill-green-300 border-white" : ""; 
+            let is_ai = (remark.ai) ? "fill-yellow-600 border-black" : "";
+            let is_ai_done = (remark.ai_done) ? "fill-green-300 border-black" : ""; 
             return (
-                <div key={index} className={`rounded-md bg-[#18181b] border-l-4 border-[#41274f] m-2 hover:border-2 hover:border-white min-h-8 min-w-80 w-max`}>
+                <div key={index} className={`rounded-md bg-black border-l-4 border-l-[#DDA853] m-2 hover:border-2 hover:border-white min-h-8 min-w-80 w-max`}>
                     <div className="flex flex-row justify-between">
-                        <p className="flex justify-start text-md self-start p-2 pr-4 max-w-[1500px] max-h-[100px] overflow-auto break-words" color="#52525b">{remark["remark"]}</p>
+                        <div className="flex justify-start text-md self-start p-2 pr-4 max-w-[1500px] max-h-[100px] overflow-auto break-words whitespace-pre-wrap" style={{color: "gray"}}>{remark["remark"]}</div>
                         <div className="flex flex-row justify-end pb-2 pr-2">
                             <Button variant="ghost" size="icon" className="place-self-end" onClick={() => set_remark_ai(remark.index)}>
-                                <Star className={`h-3.5 w-3.5 ${is_ai} hover:fill-yellow-600 hover:border-white`} color="#52525b"/>
+                                <Star className={`h-3.5 w-3.5 ${is_ai} hover:fill-yellow-600 hover:border-black`} color="#52525b"/>
                             </Button>
                             <Button variant="ghost" size="icon" className="place-self-end" onClick={() => set_remark_ai_done(remark.index)}>
-                                <SquareCheckBig className={`h-3.5 w-3.5 ${is_ai_done} hover:fill-green-300 hover:border-white`} color="#52525b"/>
+                                <Clock className={`h-3.5 w-3.5 ${is_ai_done} hover:fill-green-300 hover:border-black`} color="#52525b"/>
                             </Button>
                             <Button variant="ghost" size="icon" className="place-self-end" onClick={() => set_remark_delete(remark.index)}>
-                                <Trash2 className="h-3.5 w-3.5 hover:fill-white hover:border-white" color="#52525b"/>
+                                <Trash2 className="h-3.5 w-3.5 hover:fill-white hover:border-black" color="#52525b"/>
                             </Button>
                         </div>
                     </div>
@@ -111,7 +124,7 @@ function DayView({
     return (
         <div>
             <div className="flex justify-around">
-                <h2 className="bg-[#25162c] rounded-xl px-3 py-1 text-xs font-small tracking-wide align-middle align-text-bottom text-white">{date_string}</h2>
+                <h2 className="border-[#DDA853] border-2 rounded-xl px-3 py-1 text-sm font-small tracking-wide align-middle align-text-bottom text-gray-400">{date_string}</h2>
             </div>
             {remarks && remarks.map((remark: any, index: number) => 
                 <RemarkView 
@@ -135,30 +148,24 @@ export default function Remarks() {
     const [remarks, set_remarks] = useState<any>([]);
     const [new_remark, set_new_remark] = useState<any>([]);
     const [dates, set_dates] = useState<any>([]);
-    const [remark_add, set_remark_add] = useState<any>([]);
+    const [remark_add, set_remark_add] = useState<boolean>(false);
     const [remark_delete, set_remark_delete] = useState<any>([]);
     const [remark_ai, set_remark_ai] = useState<any>([]);
     const [remark_ai_done, set_remark_ai_done] = useState<any>([]);
+    const [ais_only, set_ais_only] = useState<boolean>(false);
+    const [pending_only, set_pending_only] = useState<boolean>(false);
+    const [dialogOpen, setDialogOpen] = useState<boolean>(false);
+    const [dialogText, setDialogText] = useState<string>("");
+    const [searchText, setSearchText] = useState<string>("");
     const searchRef = useRef<any>(null);
     const scrollRef = useRef<HTMLDivElement>(null);
 
-    const handleInput = (e:any) => {
-        const textarea = e.target;
-        textarea.style.height = 'auto';
-        textarea.style.height = `${textarea.scrollHeight}px`;
-    };
-
-    const handleKeyDown = (e:any) => {
-        if (e.key === 'Enter') {
-            // Prevent the default behavior of adding a new line when pressing Enter
-            e.preventDefault();
-
-            set_remark_add(e.currentTarget.value[0] == ":");
-            // Clear the input field when "Enter" is pressed
-            if (searchRef.current) {
-                searchRef.current.style.height = 'auto';
-                searchRef.current.value = '';
-            }
+    const handleDialogSubmit = () => {
+        if (dialogText.trim()) {
+            set_new_remark(dialogText);
+            set_remark_add(true);
+            setDialogText("");
+            setDialogOpen(false);
         }
     };
 
@@ -176,37 +183,40 @@ export default function Remarks() {
         get_dates(set_dates, remarks)
     }, [remarks]);
 
-    // Scroll to the bottom when the component mounts
+    // Add useEffect for filtering
+    useEffect(() => {
+        if (ais_only) {
+            filter_remarks(ais_only, pending_only, remarks, set_remarks);
+        } else {
+            set_remarks(all_remarks)
+        }
+        if (scrollRef.current) {
+          scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+        }
+    }, [ais_only, pending_only, all_remarks]);
+
+    // Add handler for search
+    const handleSearch = () => {
+        if (searchText.trim()) {
+            search_remarks(searchText, remarks, set_remarks);
+        } else {
+            set_remarks(all_remarks);
+        }
+        if (scrollRef.current) {
+          scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+        }
+    };
+
+    //Scroll to the bottom when the component mounts
     useEffect(() => {
         if (scrollRef.current) {
           scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
         }
     }, [remarks]);
 
-    //Setup shortcut key for Search
-    useEffect(() => {
-        const handleKeyPress = (event: KeyboardEvent) => {
-          if (((event.key === '/') || (event.key === ':')) && searchRef.current) {
-            searchRef.current.focus();
-          } else {
-            if ((event.key === 'Escape') && searchRef.current) {
-                searchRef.current.value = "";
-            }
-          }
-        };
-
-        // Add event listener when the component mounts
-        document.addEventListener('keydown', handleKeyPress);
-
-        // Clean up the event listener when the component unmounts
-        return () => {
-          document.removeEventListener('keydown', handleKeyPress);
-        };
-    }, []);
-
     //Add New Remark
     useEffect(() => {
-        if (remark_add != "") {
+        if (remark_add && new_remark) {
             let updated_remarks = [];
             let new_remark_id = 0;
             if (all_remarks) {
@@ -226,9 +236,10 @@ export default function Remarks() {
             updated_remarks.push(new_remark_data);
             update_remarks(updated_remarks);
             set_all_remarks(updated_remarks)
-            set_remark_add("");
+            set_remark_add(false);
+            set_new_remark("");
         }
-    }, [remark_add])
+    }, [remark_add, new_remark])
 
     //Mark Remark as AI
     useEffect(() => {
@@ -256,9 +267,6 @@ export default function Remarks() {
             for (let r of all_remarks) {
                 if (r.index === remark_ai_done) {
                     let r_copy = r;
-                    console.log(r.ai_done)
-                    console.log(r.ai_done == 1)
-                    console.log(r.ai_done == "1")
                     r_copy.ai_done = (r.ai_done == 1) ? 0 : 1;
                     updated_remarks.push(r_copy)
                 } else {
@@ -290,7 +298,7 @@ export default function Remarks() {
 
     //Remarks View
     return (
-        <div className="fixed top-0 left-20 w-full bg-black pt-4 flex flex-col" style={{ display: 'flex', flexDirection: 'column', height: '100vh'}}>
+        <div className="fixed top-0 left-20 right-0 bg-black pt-4 flex flex-col" style={{ display: 'flex', flexDirection: 'column', height: '100vh'}}>
             <ScrollArea className="overflow-y-auto justify-bottom pb-2"
                         style={{flex: 10}}
                         ref={scrollRef}>
@@ -309,18 +317,76 @@ export default function Remarks() {
                     }
                 })}
             </ScrollArea>
-            <div className="flex p-2">                           
-                <textarea
-                    ref={searchRef}
-                    placeholder="Add Remarks"
-                    autoFocus
-                    onChange={(event) => handle_remarks(event.target.value, all_remarks, set_remarks, set_new_remark)}
-                    onKeyDown={handleKeyDown}
-                    onInput={handleInput}
-                    className="w-11/12 border-stone-800 border-2 resize-none overflow-y-auto bg-black text-align-center p-2"
-                    rows={1}
+            <div className="flex flex-row items-center gap-2 p-2 h-12">                           
+                <Button 
+                    variant="outline" 
+                    size="default" 
+                    className="h-12 border-2 hover:border-[#DDA853] hover:bg-black" 
+                    title="Task"
+                    color="gray"
+                    onClick={() => set_ais_only(!ais_only)}
+                >
+                    <Star className={`h-5 w-5 ${ais_only ? 'fill-yellow-600' : 'text-gray'}`} color="gray"/>
+                </Button>
+                <Button 
+                    variant="outline" 
+                    size="default" 
+                    className="h-12 border-2 hover:border-[#DDA853] hover:bg-black" 
+                    title="Status"
+                    color="gray"
+                    onClick={() => set_pending_only(!pending_only)}
+                >
+                    <Clock className={`h-5 w-5 ${pending_only ? 'fill-red-600' : 'text-gray'}`} color="gray"/>
+                </Button>
+                <Button 
+                    variant="outline" 
+                    size="default" 
+                    className="h-12 border-2 hover:border-[#DDA853] hover:bg-black" 
+                    color="gray"
+                    onClick={() => setDialogOpen(true)}>
+                    <Plus color="gray"/>
+                </Button>
+                <input
+                    type="text"
+                    value={searchText}
+                    onChange={(e) => setSearchText(e.target.value)}
+                    placeholder="Filter Tasks ..." 
+                    className="h-12 px-3 border-2 border-stone-800 hover:border-stone-400 bg-black text-white rounded-md focus:outline-none flex-1"
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                            handleSearch();
+                        }
+                    }}
                 />
             </div>
+            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                <DialogContent className="bg-black border-1 border-white text-white">
+                    <div className="py-4">
+                        <textarea
+                            value={dialogText}
+                            onChange={(e) => setDialogText(e.target.value)}
+                            placeholder="Add New Remark ..."
+                            className="w-full h-32 border-1 border-white bg-black text-gray p-3 resize-none rounded-md focus:outline-none focus:ring-2 focus:ring-white"
+                            autoFocus
+                        />
+                    </div>
+                    <DialogFooter>
+                        <Button 
+                            variant="outline" 
+                            onClick={() => {setDialogOpen(false); setDialogText("")}}
+                            className="border-white text-white hover:bg-[#DDA853] hover:text-black"
+                        >
+                            Cancel
+                        </Button>
+                        <Button 
+                            onClick={handleDialogSubmit}
+                            className="bg-[#DDA853] text-black hover:bg-[#DDA853]/80"
+                        >
+                            Add
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     )
 }

@@ -267,17 +267,9 @@ export default function Tasks() {
                 return [columnComponent];
             })}
         </div>
-        <div className="flex flex-row align-middle py-4 pl-16 justify-self-center">
-            <Button 
-                variant="outline" 
-                size="default" 
-                className="h-12 border-2 hover:border-[#DDA853] group relative" 
-                onClick={() => set_backup(1)}
-            >
-                <DatabaseBackup color="#183B4E" />
-                <span className="absolute -top-10 left-1/2 transform -translate-x-1/2 bg-black text-white px-2 py-1 rounded text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
-                    Backup
-                </span>
+        <div className="flex flex-row align-middle py-4 pl-24 justify-self-center gap-4">
+            <Button variant="outline" size="default" className="h-12 border-2 hover:border-[#DDA853] hover:bg-black" onClick={() => set_backup(0)}>
+                <DatabaseBackup color="gray" />
             </Button>
             <div className="w-full bottom-0 flex bg-black">
                 <Input

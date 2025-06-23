@@ -42,7 +42,7 @@ export function SearchBox({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-full justify-between"
+          className="w-full justify-between bg-black border-[#333] hover:bg-black hover:border-[#DDA853] transition-all duration-200"
         >
           {value[1]
             ? suggestions.find((task: any) => task.name === value[1]).name
@@ -50,7 +50,7 @@ export function SearchBox({
           <ListPlus className="ml-2 h-5 w-5 shrink-0 opacity-100" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-full p-0">
+      <PopoverContent className="w-full p-0 border-white">
         <Command className="bg-black hover:bg-black">
           <CommandInput placeholder="Search by Task/Tag" className="h-9" />
           <CommandList>

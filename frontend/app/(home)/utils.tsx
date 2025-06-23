@@ -54,27 +54,27 @@ export async function update_remarks(updated_remarks: any) {
 //Function to color code Tasks based on Tag with pastel colors
 export async function get_tag_colors(all_entries: any, set_colors: any) {
     let all_colors = [
-        "bg-[#FDCFE8]", // Dark Pink (muted)
-        "bg-[#CCFF90]", // Dark Green (muted)
-        "bg-[#FFF475]", // Dark Yellow (muted)
-        "bg-[#FBB040]", // Dark Orange (muted)
-        "bg-[#E6C9A8]", // Dark Brown (muted)
-        "bg-[#A7FFEB]", // Dark Teal (muted)
-        "bg-[#CBF0F8]", // Dark Lavender (muted)
-        "bg-[#F28B82]", // Dark Red (muted)
-        "bg-[#D7AEFB]", // Dark Purple (muted)
-        "bg-[#FDCFE8]", // Dark Pink
-        "bg-[#CCFF90]", // Dark Green
-        "bg-[#FFF475]", // Dark Yellow
-        "bg-[#FBB040]", // Dark Orange
-        "bg-[#E6C9A8]", // Dark Brown
-        "bg-[#A7FFEB]", // Dark Teal
-        "bg-[#CBF0F8]", // Dark Lavender
-        "bg-[#F28B82]", // Dark Red
-        "bg-[#D7AEFB]", // Dark Purple
+        "[#FDCFE8]", // Dark Pink (muted)
+        "[#CCFF90]", // Dark Green (muted)
+        "[#FFF475]", // Dark Yellow (muted)
+        "[#FBB040]", // Dark Orange (muted)
+        "[#E6C9A8]", // Dark Brown (muted)
+        "[#A7FFEB]", // Dark Teal (muted)
+        "[#CBF0F8]", // Dark Lavender (muted)
+        "[#F28B82]", // Dark Red (muted)
+        "[#D7AEFB]", // Dark Purple (muted)
+        "[#FDCFE8]", // Dark Pink
+        "[#CCFF90]", // Dark Green
+        "[#FFF475]", // Dark Yellow
+        "[#FBB040]", // Dark Orange
+        "[#E6C9A8]", // Dark Brown
+        "[#A7FFEB]", // Dark Teal
+        "[#CBF0F8]", // Dark Lavender
+        "[#F28B82]", // Dark Red
+        "[#D7AEFB]", // Dark Purple
     ];
     let i = 0; 
-    let colors: { [key: string]: string } = { "New Task": "bg-[#CBF0F8]" };
+    let colors: { [key: string]: string } = { "New Task": "[#CBF0F8]" };
 
     for (let elem of all_entries) {
         if (!(elem.tag in colors)) {
