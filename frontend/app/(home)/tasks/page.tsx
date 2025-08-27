@@ -78,8 +78,8 @@ export default function Tasks() {
     const [planned_date, set_planned_date] = useState<any>("")
     const [start_date, set_start_date] = useState<any>("")
     const [end_date, set_end_date] = useState<any>("")
-    const [task_update, set_task_update] = useState<any>(0)
-    const [task_delete, set_task_delete] = useState<any>(0)
+    const [task_update, set_task_update] = useState<any>(-1)
+    const [task_delete, set_task_delete] = useState<any>(-1)
     const [task_add, set_task_add] = useState<any>(0)
     const searchRef = useRef<HTMLInputElement>(null);
     const [backup, set_backup] = useState<any>(0);
@@ -117,7 +117,7 @@ export default function Tasks() {
 
     //Update task
     useEffect (() => {
-      if (task_update != "") {
+        if (task_update > -1) {
         //Select the task to be updated
         let t_updated
         for (let t of all_tasks) {
@@ -156,13 +156,13 @@ export default function Tasks() {
         
         //Update the task view with new info
         set_tasks(updated_tasks)
-        set_task_update("")
+            set_task_update(-1)
       }
     }, [task_update])
 
     //Delete task
     useEffect (() => {
-        if (task_delete != "") {
+        if (task_delete > -1) {
             let updated_tasks = []
             for (let t of all_tasks) {
                 if (t.index === task_delete) {
@@ -177,7 +177,7 @@ export default function Tasks() {
 
             //Remove the deleted task from current view
             set_tasks(updated_tasks)
-            set_task_delete("")
+            set_task_delete(-1)
         }
     }, [task_delete])
 

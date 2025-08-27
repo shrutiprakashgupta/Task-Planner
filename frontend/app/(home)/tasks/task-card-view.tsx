@@ -162,7 +162,7 @@ export default function TaskCardView({
     return (
         <Card className="rounded-xl border-2 bg-black hover:shadow-lg my-3 p-[2px]" style={{ borderBottomWidth: '2px', borderBottomColor: tagColor, borderLeftColor: '#333', borderRightColor: '#333', borderTopColor: '#333' }} onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'white'; e.currentTarget.style.borderBottomColor = tagColor; }} onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#333'; e.currentTarget.style.borderBottomColor = tagColor; }}>
             <CardHeader>
-                <CardTitle className="font-sans text-white">
+                <CardTitle className="font-sans text-gray-400">
                     <div className="flex flex-row justify-between">
                         <p>{task.name}</p>
                         <div>
